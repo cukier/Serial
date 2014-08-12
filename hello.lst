@@ -1,0 +1,132 @@
+CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 11:24
+
+               Filename:   D:\Projetos\Serial\hello.lst
+
+               ROM used:   392 bytes (1%)
+                           Largest free fragment is 32376
+               RAM used:   8 (1%) at main() level
+                           17 (1%) worst case
+               Stack:     1 locations
+
+*
+0000:  GOTO   0102
+.................... /* 
+....................  * hello.c 
+....................  * 
+....................  *  Created on: 12/08/2014 
+....................  *      Author: cuki 
+....................  */ 
+....................  
+.................... #include<18F252.h> 
+.................... //////// Standard Header file for the PIC18F252 device //////////////// 
+.................... #device PIC18F252 
+.................... #list 
+....................  
+.................... #zero_ram 
+....................  
+.................... #fuses HS 
+.................... #use delay(clock=15MHz) 
+00D8:  CLRF   FEA
+00DA:  MOVLW  06
+00DC:  MOVWF  FE9
+00DE:  MOVF   FEF,W
+00E0:  BZ    00FE
+00E2:  MOVLW  04
+00E4:  MOVWF  01
+00E6:  CLRF   00
+00E8:  DECFSZ 00,F
+00EA:  BRA    00E8
+00EC:  DECFSZ 01,F
+00EE:  BRA    00E6
+00F0:  MOVLW  DC
+00F2:  MOVWF  00
+00F4:  DECFSZ 00,F
+00F6:  BRA    00F4
+00F8:  NOP   
+00FA:  DECFSZ FEF,F
+00FC:  BRA    00E2
+00FE:  GOTO   0180 (RETURN)
+.................... #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7) 
+....................  
+.................... long i = 0; 
+....................  
+.................... int main(void) { 
+0102:  CLRF   FF8
+0104:  BCF    FD0.7
+0106:  MOVLW  FE
+0108:  MOVWF  00
+010A:  MOVLW  06
+010C:  MOVWF  01
+010E:  MOVLW  02
+0110:  MOVWF  FE9
+0112:  MOVLW  00
+0114:  MOVWF  FEA
+0116:  CLRF   FEE
+0118:  DECFSZ 00,F
+011A:  BRA    0116
+011C:  DECFSZ 01,F
+011E:  BRA    0116
+0120:  CLRF   FEA
+0122:  CLRF   FE9
+0124:  MOVLW  61
+0126:  MOVWF  FAF
+0128:  MOVLW  A6
+012A:  MOVWF  FAC
+012C:  MOVLW  90
+012E:  MOVWF  FAB
+0130:  CLRF   05
+0132:  CLRF   04
+0134:  BSF    FC1.0
+0136:  BSF    FC1.1
+0138:  BSF    FC1.2
+013A:  BCF    FC1.3
+.................... 	while (TRUE) { 
+.................... 		printf("Hello %lu\n\r", i++); 
+013C:  MOVFF  05,03
+0140:  MOVF   04,W
+0142:  INCF   04,F
+0144:  BTFSC  FD8.2
+0146:  INCF   05,F
+0148:  MOVWF  06
+014A:  MOVFF  03,07
+014E:  MOVLW  04
+0150:  MOVWF  FF6
+0152:  MOVLW  00
+0154:  MOVWF  FF7
+0156:  MOVLW  06
+0158:  MOVWF  08
+015A:  BRA    0010
+015C:  MOVLW  10
+015E:  MOVWF  FE9
+0160:  MOVFF  07,09
+0164:  MOVFF  06,08
+0168:  BRA    0032
+016A:  MOVLW  0A
+016C:  BTFSS  F9E.4
+016E:  BRA    016C
+0170:  MOVWF  FAD
+0172:  MOVLW  0D
+0174:  BTFSS  F9E.4
+0176:  BRA    0174
+0178:  MOVWF  FAD
+.................... 		delay_ms(100); 
+017A:  MOVLW  64
+017C:  MOVWF  06
+017E:  BRA    00D8
+.................... 	} 
+0180:  BRA    013C
+....................  
+.................... 	return 0; 
+0182:  MOVLW  00
+0184:  MOVWF  01
+.................... } 
+0186:  SLEEP 
+
+Configuration Fuses:
+   Word  1: 2200   HS NOOSCSEN
+   Word  2: 0E0E   PUT BROWNOUT BORV20 NOWDT WDT128
+   Word  3: 0100   CCP2C1
+   Word  4: 0081   STVREN NOLVP NODEBUG
+   Word  5: C00F   NOPROTECT NOCPB NOCPD
+   Word  6: E00F   NOWRT NOWRTC NOWRTB NOWRTD
+   Word  7: 400F   NOEBTR NOEBTRB
