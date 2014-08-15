@@ -1,11 +1,11 @@
-CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 11:17
+CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 12:15
 
                Filename:   D:\Projetos\Serial\repetidor.lst
 
-               ROM used:   416 bytes (1%)
-                           Largest free fragment is 32348
-               RAM used:   283 (18%) at main() level
-                           286 (19%) worst case
+               ROM used:   418 bytes (1%)
+                           Largest free fragment is 32346
+               RAM used:   284 (18%) at main() level
+                           287 (19%) worst case
                Stack:     2 worst case (1 in main + 1 for interrupts)
 
 *
@@ -74,7 +74,7 @@ CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 11:17
 .................... #use delay(clock=15MHz) 
 0108:  MOVLW  01
 010A:  MOVWF  FEA
-010C:  MOVLW  1B
+010C:  MOVLW  1C
 010E:  MOVWF  FE9
 0110:  MOVF   FEF,W
 0112:  BZ    0130
@@ -92,13 +92,14 @@ CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 11:17
 012A:  NOP   
 012C:  DECFSZ FEF,F
 012E:  BRA    0114
-0130:  GOTO   0196 (RETURN)
+0130:  GOTO   0198 (RETURN)
 .................... #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7) 
 ....................  
 .................... #define buffer_size 256 
 ....................  
 .................... int buffer[buffer_size]; 
 .................... int line = 0; 
+.................... int lido = 0; 
 ....................  
 .................... #INT_RDA 
 .................... void serial_isr() { 
@@ -159,52 +160,53 @@ CCS PCH C Compiler, Version 4.140, 22098               12-ago-14 11:17
 0162:  MOVWF  FAB
 0164:  MOVLB  1
 0166:  CLRF   x19
-0168:  BSF    FC1.0
-016A:  BSF    FC1.1
-016C:  BSF    FC1.2
-016E:  BCF    FC1.3
+0168:  CLRF   x1A
+016A:  BSF    FC1.0
+016C:  BSF    FC1.1
+016E:  BSF    FC1.2
+0170:  BCF    FC1.3
 ....................  
 .................... 	clear_interrupt(INT_RDA); 
 .................... 	enable_interrupts(INT_RDA); 
-0170:  BSF    F9D.5
+0172:  BSF    F9D.5
 .................... 	enable_interrupts(GLOBAL); 
-0172:  MOVLW  C0
-0174:  IORWF  FF2,F
+0174:  MOVLW  C0
+0176:  IORWF  FF2,F
 ....................  
 .................... 	while (TRUE) { 
 .................... 		if (buffer[0] != '\0') { 
-0176:  MOVF   19,F
-0178:  BZ    018A
+0178:  MOVF   19,F
+017A:  BZ    018C
 .................... 			printf("%s", buffer); 
-017A:  CLRF   FEA
-017C:  MOVLW  19
-017E:  MOVWF  FE9
-0180:  MOVLB  0
-0182:  BRA    00E0
+017C:  CLRF   FEA
+017E:  MOVLW  19
+0180:  MOVWF  FE9
+0182:  MOVLB  0
+0184:  BRA    00E0
 .................... 			buffer[0] = '\0'; 
-0184:  CLRF   19
+0186:  CLRF   19
 .................... 			line = 0; 
-0186:  MOVLB  1
-0188:  CLRF   x19
+0188:  MOVLB  1
+018A:  CLRF   x19
 .................... 		} 
 .................... 		delay_ms(1500); 
-018A:  MOVLW  06
-018C:  MOVWF  x1A
-018E:  MOVLW  FA
-0190:  MOVWF  x1B
-0192:  MOVLB  0
-0194:  BRA    0108
-0196:  MOVLB  1
-0198:  DECFSZ x1A,F
-019A:  BRA    018E
+018C:  MOVLW  06
+018E:  MOVWF  x1B
+0190:  MOVLW  FA
+0192:  MOVWF  x1C
+0194:  MOVLB  0
+0196:  BRA    0108
+0198:  MOVLB  1
+019A:  DECFSZ x1B,F
+019C:  BRA    0190
 .................... 	} 
-019C:  BRA    0176
+019E:  BRA    0178
 ....................  
 .................... 	return 0; 
-019E:  MOVLW  00
-01A0:  MOVWF  01
+01A0:  MOVLW  00
+01A2:  MOVWF  01
 .................... } 
-01A2:  SLEEP 
+01A4:  SLEEP 
 
 Configuration Fuses:
    Word  1: 2200   HS NOOSCSEN

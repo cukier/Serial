@@ -1,7 +1,7 @@
 D G "__PCH__" 0 0 ""4.140""
 D G "__DEVICE__" 0 0 ""
 D G "__DATE__" 0 0 ""12-ago-14""
-D G "__TIME__" 0 0 ""11:17:12"" "* repetidor.c"
+D G "__TIME__" 0 0 ""12:15:02"" "* repetidor.c"
 C G "" 0 1 1 "*"
 C G "" 0 1 1 "*"
 d G "PIN_A0" 1 22 "31744"
@@ -205,8 +205,9 @@ d G "INT_EEPROM" 1 319 "0x00A010"
 D G "buffer_size" 0 15 "256"
 V G "buffer" 0 17 "int8[256]"
 V G "line" 0 18 "int8"
-F G "serial_isr" 0 21 "void()"
-F G "MAIN" 0 27 "int8()"
+V G "lido" 0 19 "int8"
+F G "serial_isr" 0 22 "void()"
+F G "MAIN" 0 28 "int8()"
 F B "reset_cpu" 0 0
 F B "abs" 1 0
 F B "sleep" 0 0
