@@ -1,0 +1,406 @@
+CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 10:20
+
+               Filename:   D:\Projetos\Serial\encodersim.lst
+
+               ROM used:   590 bytes (2%)
+                           Largest free fragment is 32174
+               RAM used:   29 (2%) at main() level
+                           32 (2%) worst case
+               Stack:     3 worst case (2 in main + 1 for interrupts)
+
+*
+0000:  GOTO   0208
+*
+0008:  MOVWF  04
+000A:  MOVFF  FD8,05
+000E:  MOVFF  FE0,06
+0012:  MOVLB  0
+0014:  MOVFF  FE9,0C
+0018:  MOVFF  FEA,07
+001C:  MOVFF  FE1,08
+0020:  MOVFF  FE2,09
+0024:  MOVFF  FD9,0A
+0028:  MOVFF  FDA,0B
+002C:  MOVFF  FF3,12
+0030:  MOVFF  FF4,13
+0034:  MOVFF  FFA,14
+0038:  MOVFF  FF5,15
+003C:  MOVFF  FF6,16
+0040:  MOVFF  FF7,17
+0044:  MOVFF  00,0E
+0048:  MOVFF  01,0F
+004C:  MOVFF  02,10
+0050:  MOVFF  03,11
+0054:  BTFSS  FF2.5
+0056:  GOTO   0060
+005A:  BTFSC  FF2.2
+005C:  GOTO   00AE
+0060:  MOVFF  0E,00
+0064:  MOVFF  0F,01
+0068:  MOVFF  10,02
+006C:  MOVFF  11,03
+0070:  MOVFF  0C,FE9
+0074:  MOVFF  07,FEA
+0078:  BSF    07.7
+007A:  MOVFF  08,FE1
+007E:  MOVFF  09,FE2
+0082:  MOVFF  0A,FD9
+0086:  MOVFF  0B,FDA
+008A:  MOVFF  12,FF3
+008E:  MOVFF  13,FF4
+0092:  MOVFF  14,FFA
+0096:  MOVFF  15,FF5
+009A:  MOVFF  16,FF6
+009E:  MOVFF  17,FF7
+00A2:  MOVF   04,W
+00A4:  MOVFF  06,FE0
+00A8:  MOVFF  05,FD8
+00AC:  RETFIE 0
+.................... /* 
+....................  * encodersim.c 
+....................  * 
+....................  *  Created on: 15/08/2014 
+....................  *      Author: cuki 
+....................  */ 
+....................  
+.................... #include <18F252.h> 
+.................... //////// Standard Header file for the PIC18F252 device //////////////// 
+.................... #device PIC18F252 
+.................... #list 
+....................  
+....................  
+.................... #fuses HS 
+....................  
+.................... #use delay(clock=15MHz) 
+*
+00DC:  CLRF   FEA
+00DE:  MOVLW  1E
+00E0:  MOVWF  FE9
+00E2:  MOVF   FEF,W
+00E4:  BZ    0102
+00E6:  MOVLW  04
+00E8:  MOVWF  01
+00EA:  CLRF   00
+00EC:  DECFSZ 00,F
+00EE:  BRA    00EC
+00F0:  DECFSZ 01,F
+00F2:  BRA    00EA
+00F4:  MOVLW  DC
+00F6:  MOVWF  00
+00F8:  DECFSZ 00,F
+00FA:  BRA    00F8
+00FC:  NOP   
+00FE:  DECFSZ FEF,F
+0100:  BRA    00E6
+0102:  RETURN 0
+.................... //#use rs232(xmit=PIN_C6, baud=9600) 
+....................  
+.................... //saidas 
+.................... #define canal_a PIN_C7 
+.................... #define canal_b PIN_C6 
+.................... #define canal_z PIN_C5 
+.................... //entradas 
+.................... #define av PIN_B0 
+.................... #define rv PIN_B1 
+.................... //timers 
+.................... #define tmr0_reg 25515 
+.................... #define debouce 100 
+.................... //estados de saida do encoder 
+.................... #define estado_a 0 
+.................... #define estado_b 1 
+.................... #define estado_c 2 
+.................... #define estado_d 3 
+.................... //resolucao do encoder 
+.................... #define resolucao 512 
+....................  
+.................... short ctrl = FALSE; 
+.................... short emAvanco = FALSE; 
+.................... short ligaTimer = FALSE; 
+.................... int estado = 0; 
+.................... signed long cont = 0; 
+....................  
+.................... #INT_TIMER0 
+.................... void isr_timer0() { 
+....................  
+.................... 	clear_interrupt(INT_TIMER0); 
+*
+00AE:  BCF    FF2.2
+.................... 	set_timer0(tmr0_reg); 
+00B0:  MOVLW  63
+00B2:  MOVWF  FD7
+00B4:  MOVLW  AB
+00B6:  MOVWF  FD6
+....................  
+.................... 	if (emAvanco) 
+00B8:  BTFSS  19.1
+00BA:  BRA    00C0
+.................... 		++estado; 
+00BC:  INCF   1A,F
+.................... 	else 
+00BE:  BRA    00C2
+.................... 		--estado; 
+00C0:  DECF   1A,F
+....................  
+.................... 	if (estado == estado_d + 1) 
+00C2:  MOVF   1A,W
+00C4:  SUBLW  04
+00C6:  BNZ   00CC
+.................... 		estado = estado_a; 
+00C8:  CLRF   1A
+.................... 	else if (estado == 0xFF) 
+00CA:  BRA    00D4
+00CC:  INCFSZ 1A,W
+00CE:  BRA    00D4
+.................... 		estado = estado_d; 
+00D0:  MOVLW  03
+00D2:  MOVWF  1A
+....................  
+.................... 	ctrl = TRUE; 
+00D4:  BSF    19.0
+.................... } 
+....................  
+00D6:  BCF    FF2.2
+00D8:  GOTO   0060
+.................... void check_bto() { 
+*
+0104:  BSF    F93.0
+0106:  BCF    1D.0
+0108:  BTFSS  F81.0
+010A:  BSF    1D.0
+010C:  BSF    F93.1
+010E:  BCF    1D.1
+0110:  BTFSS  F81.1
+0112:  BSF    1D.1
+....................  
+.................... 	short i_av = !input(av); 
+.................... 	short i_rv = !input(rv); 
+....................  
+.................... 	if (i_av ^ i_rv) { 
+0114:  MOVLW  00
+0116:  BTFSC  1D.0
+0118:  MOVLW  01
+011A:  MOVWF  1F
+011C:  MOVLW  00
+011E:  BTFSC  1D.1
+0120:  MOVLW  01
+0122:  XORWF  1F,W
+0124:  BZ    015A
+.................... 		if (i_av) { 
+0126:  BTFSS  1D.0
+0128:  BRA    0136
+.................... 			delay_ms(debouce); 
+012A:  MOVLW  64
+012C:  MOVWF  1E
+012E:  RCALL  00DC
+.................... 			if (i_av) 
+0130:  BTFSS  1D.0
+0132:  BRA    0136
+.................... 				emAvanco = TRUE; 
+0134:  BSF    19.1
+.................... 		} 
+.................... 		if (i_rv) { 
+0136:  BTFSS  1D.1
+0138:  BRA    0146
+.................... 			delay_ms(debouce); 
+013A:  MOVLW  64
+013C:  MOVWF  1E
+013E:  RCALL  00DC
+.................... 			if (i_rv) 
+0140:  BTFSS  1D.1
+0142:  BRA    0146
+.................... 				emAvanco = FALSE; 
+0144:  BCF    19.1
+.................... 		} 
+.................... 		if (ligaTimer) { 
+0146:  BTFSS  19.2
+0148:  BRA    0158
+.................... 			ligaTimer = FALSE; 
+014A:  BCF    19.2
+.................... 			set_timer0(tmr0_reg); 
+014C:  MOVLW  63
+014E:  MOVWF  FD7
+0150:  MOVLW  AB
+0152:  MOVWF  FD6
+.................... 			setup_timer_0(T0_INTERNAL | T0_DIV_16); 
+0154:  MOVLW  83
+0156:  MOVWF  FD5
+.................... 		} 
+.................... 	} else if (!ligaTimer) { 
+0158:  BRA    0162
+015A:  BTFSC  19.2
+015C:  BRA    0162
+.................... 		ligaTimer = TRUE; 
+015E:  BSF    19.2
+.................... 		setup_timer_0(T0_OFF); 
+0160:  CLRF   FD5
+.................... 	} 
+.................... } 
+0162:  GOTO   0248 (RETURN)
+....................  
+.................... void atualiza_saida() { 
+.................... 	if (ctrl) { 
+0166:  BTFSS  19.0
+0168:  BRA    01E2
+.................... 		ctrl = FALSE; 
+016A:  BCF    19.0
+.................... 		switch (estado) { 
+016C:  MOVF   1A,W
+016E:  ADDLW  FC
+0170:  BC    01CE
+0172:  ADDLW  04
+0174:  GOTO   01E6
+.................... 		case estado_a: 
+.................... 			output_high(canal_a); 
+0178:  BCF    F94.7
+017A:  BSF    F8B.7
+.................... 			output_high(canal_b); 
+017C:  BCF    F94.6
+017E:  BSF    F8B.6
+.................... 			if (emAvanco) 
+0180:  BTFSS  19.1
+0182:  BRA    018A
+.................... 				++cont; 
+0184:  INCF   1B,F
+0186:  BTFSC  FD8.2
+0188:  INCF   1C,F
+.................... 			if (cont >= resolucao) 
+018A:  BTFSC  1C.7
+018C:  BRA    0198
+018E:  MOVF   1C,W
+0190:  SUBLW  01
+0192:  BC    0198
+.................... 				cont = 0; 
+0194:  CLRF   1C
+0196:  CLRF   1B
+.................... 			break; 
+0198:  BRA    01CE
+.................... 		case estado_b: 
+.................... 			output_high(canal_a); 
+019A:  BCF    F94.7
+019C:  BSF    F8B.7
+.................... 			output_low(canal_b); 
+019E:  BCF    F94.6
+01A0:  BCF    F8B.6
+.................... 			break; 
+01A2:  BRA    01CE
+.................... 		case estado_c: 
+.................... 			output_low(canal_a); 
+01A4:  BCF    F94.7
+01A6:  BCF    F8B.7
+.................... 			output_low(canal_b); 
+01A8:  BCF    F94.6
+01AA:  BCF    F8B.6
+.................... 			break; 
+01AC:  BRA    01CE
+.................... 		case estado_d: 
+.................... 			output_low(canal_a); 
+01AE:  BCF    F94.7
+01B0:  BCF    F8B.7
+.................... 			output_high(canal_b); 
+01B2:  BCF    F94.6
+01B4:  BSF    F8B.6
+.................... 			if (!emAvanco) 
+01B6:  BTFSC  19.1
+01B8:  BRA    01C2
+.................... 				--cont; 
+01BA:  MOVF   1B,W
+01BC:  BTFSC  FD8.2
+01BE:  DECF   1C,F
+01C0:  DECF   1B,F
+.................... 			if (cont < 0) 
+01C2:  BTFSC  1C.7
+01C4:  BRA    01C8
+01C6:  BRA    01CE
+.................... 				cont = resolucao - 1; 
+01C8:  MOVLW  01
+01CA:  MOVWF  1C
+01CC:  SETF   1B
+.................... 			break; 
+.................... 		} 
+....................  
+.................... 		if (estado == estado_a && !cont) 
+01CE:  MOVF   1A,F
+01D0:  BNZ   01DE
+01D2:  MOVF   1B,W
+01D4:  IORWF  1C,W
+01D6:  BNZ   01DE
+.................... 			output_high(canal_z); 
+01D8:  BCF    F94.5
+01DA:  BSF    F8B.5
+.................... 		else 
+01DC:  BRA    01E2
+.................... 			output_low(canal_z); 
+01DE:  BCF    F94.5
+01E0:  BCF    F8B.5
+.................... 	} 
+.................... } 
+01E2:  GOTO   024A (RETURN)
+....................  
+.................... int main(void) { 
+*
+0208:  CLRF   FF8
+020A:  BCF    FD0.7
+020C:  BSF    07.7
+020E:  CLRF   FEA
+0210:  CLRF   FE9
+0212:  BCF    19.0
+0214:  BCF    19.1
+0216:  BCF    19.2
+0218:  CLRF   1A
+021A:  CLRF   1C
+021C:  CLRF   1B
+021E:  BSF    FC1.0
+0220:  BSF    FC1.1
+0222:  BSF    FC1.2
+0224:  BCF    FC1.3
+....................  
+.................... 	set_timer0(tmr0_reg); 
+0226:  MOVLW  63
+0228:  MOVWF  FD7
+022A:  MOVLW  AB
+022C:  MOVWF  FD6
+.................... 	setup_timer_0(T0_OFF); 
+022E:  CLRF   FD5
+.................... 	clear_interrupt(INT_TIMER0); 
+0230:  BCF    FF2.2
+.................... 	enable_interrupts(INT_TIMER0 | GLOBAL); 
+0232:  MOVLW  E0
+0234:  IORWF  FF2,F
+....................  
+.................... 	port_b_pullups(TRUE); 
+0236:  BCF    FF1.7
+....................  
+.................... 	estado = estado_a; 
+0238:  CLRF   1A
+.................... 	output_low(canal_a); 
+023A:  BCF    F94.7
+023C:  BCF    F8B.7
+.................... 	output_low(canal_b); 
+023E:  BCF    F94.6
+0240:  BCF    F8B.6
+.................... 	output_high(canal_z); 
+0242:  BCF    F94.5
+0244:  BSF    F8B.5
+....................  
+.................... 	while (TRUE) { 
+.................... 		check_bto(); 
+0246:  BRA    0104
+.................... 		atualiza_saida(); 
+0248:  BRA    0166
+.................... 	} 
+024A:  BRA    0246
+....................  
+.................... 	return 0; 
+024C:  MOVLW  00
+024E:  MOVWF  01
+.................... } 
+0250:  SLEEP 
+
+Configuration Fuses:
+   Word  1: 2200   HS NOOSCSEN
+   Word  2: 0E0E   PUT BROWNOUT BORV20 NOWDT WDT128
+   Word  3: 0100   CCP2C1
+   Word  4: 0081   STVREN NOLVP NODEBUG
+   Word  5: C00F   NOPROTECT NOCPB NOCPD
+   Word  6: E00F   NOWRT NOWRTC NOWRTB NOWRTD
+   Word  7: 400F   NOEBTR NOEBTRB
