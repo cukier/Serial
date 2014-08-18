@@ -79,6 +79,9 @@ int main(void) {
 	enable_interrupts(INT_TIMER2);
 	enable_interrupts(GLOBAL);
 
+	output_low(saida_sobe);
+	output_low(saida_desce);
+
 	while (TRUE) {
 		if (recived) {
 			recived = FALSE;
@@ -90,12 +93,12 @@ int main(void) {
 
 			if (m_addr == addr) {
 				if (cmd == cmd_subir)
-					output_low(saida_sobe);
-				else if (cmd == cmd_descer)
-					output_low(saida_desce);
-				else if (cmd == cmd_parar) {
 					output_high(saida_sobe);
+				else if (cmd == cmd_descer)
 					output_high(saida_desce);
+				else if (cmd == cmd_parar) {
+					output_low(saida_sobe);
+					output_low(saida_desce);
 				}
 				printf("%u%lu", m_addr, get_timer0());
 			}

@@ -5,11 +5,11 @@
  *      Author: cuki
  */
 
-#include <18F252.h>
+#include <18F452.h>
 
 #fuses HS
 
-#use delay(clock=15MHz)
+#use delay(clock=16MHz)
 //#use rs232(xmit=PIN_C6, baud=9600)
 
 //saidas
@@ -20,7 +20,7 @@
 #define av PIN_B0
 #define rv PIN_B1
 //timers
-#define tmr0_reg 25515
+#define tmr0_reg 59755
 #define debouce 100
 //estados de saida do encoder
 #define estado_a 0
@@ -52,7 +52,37 @@ void isr_timer0() {
 	else if (estado == 0xFF)
 		estado = estado_d;
 
-	ctrl = TRUE;
+	switch (estado) {
+	case estado_a:
+		output_high(canal_a);
+		output_high(canal_b);
+		if (emAvanco)
+			++cont;
+		if (cont >= resolucao)
+			cont = 0;
+		break;
+	case estado_b:
+		output_high(canal_a);
+		output_low(canal_b);
+		break;
+	case estado_c:
+		output_low(canal_a);
+		output_low(canal_b);
+		break;
+	case estado_d:
+		output_low(canal_a);
+		output_high(canal_b);
+		if (!emAvanco)
+			--cont;
+		if (cont < 0)
+			cont = resolucao - 1;
+		break;
+	}
+
+	if (estado == estado_a && !cont)
+		output_high(canal_z);
+	else
+		output_low(canal_z);
 }
 
 void check_bto() {
@@ -74,48 +104,11 @@ void check_bto() {
 		if (ligaTimer) {
 			ligaTimer = FALSE;
 			set_timer0(tmr0_reg);
-			setup_timer_0(T0_INTERNAL | T0_DIV_16);
+			setup_timer_0(T0_INTERNAL | T0_DIV_1);
 		}
 	} else if (!ligaTimer) {
 		ligaTimer = TRUE;
 		setup_timer_0(T0_OFF);
-	}
-}
-
-void atualiza_saida() {
-	if (ctrl) {
-		ctrl = FALSE;
-		switch (estado) {
-		case estado_a:
-			output_high(canal_a);
-			output_high(canal_b);
-			if (emAvanco)
-				++cont;
-			if (cont >= resolucao)
-				cont = 0;
-			break;
-		case estado_b:
-			output_high(canal_a);
-			output_low(canal_b);
-			break;
-		case estado_c:
-			output_low(canal_a);
-			output_low(canal_b);
-			break;
-		case estado_d:
-			output_low(canal_a);
-			output_high(canal_b);
-			if (!emAvanco)
-				--cont;
-			if (cont < 0)
-				cont = resolucao - 1;
-			break;
-		}
-
-		if (estado == estado_a && !cont)
-			output_high(canal_z);
-		else
-			output_low(canal_z);
 	}
 }
 
@@ -135,7 +128,6 @@ int main(void) {
 
 	while (TRUE) {
 		check_bto();
-		atualiza_saida();
 	}
 
 	return 0;

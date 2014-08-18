@@ -8,6 +8,8 @@
 #include<18F252.h>
 #zero_ram
 
+#include<stdlib.h>
+
 #fuses HS
 #use delay(clock=15MHz)
 #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7)
@@ -27,6 +29,8 @@
 //tempos
 #define debounce 100
 
+long pos_elev[16];
+
 int buffer[buffer_size];
 int line = 0;
 int lido = 0;
@@ -36,13 +40,6 @@ short recived = FALSE;
 short en_timer2 = TRUE;
 short send_stp = TRUE;
 short ctrl_bto = FALSE;
-
-typedef struct elev_struct {
-	int addr;
-	long pos;
-} elev_type;
-
-elev_type elevador[4];
 
 #INT_RDA
 void serial_isr() {
@@ -86,6 +83,9 @@ int trata_bto() {
 
 int main(void) {
 
+	int cont;
+	int posAray[50];
+
 	clear_interrupt(INT_TIMER2);
 	set_timer2(0);
 	setup_timer_2(T2_DISABLED, 255, 1);
@@ -99,9 +99,11 @@ int main(void) {
 		if (recived) {
 			recived = FALSE;
 			int addr = buffer[0] - 48;
-			int pos = buffer[1] - 48;
-			elevador[addr].addr = addr;
-			elevador[0].pos = pos;
+			for (cont = 1; cont < line; ++cont) {
+				posAray[cont - 1] = buffer[cont];
+			}
+//			long pos = atol(posAray);
+			pos_elev[addr] = atol(posAray);
 			buffer[0] = '\0';
 			line = 0;
 			en_timer2 = TRUE;
