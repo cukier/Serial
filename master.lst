@@ -1,15 +1,15 @@
-CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
+CCS PCH C Compiler, Version 4.140, 22098               20-ago-14 15:26
 
                Filename:   D:\Projetos\Serial\master.lst
 
-               ROM used:   1496 bytes (5%)
-                           Largest free fragment is 31268
-               RAM used:   345 (22%) at main() level
-                           361 (24%) worst case
-               Stack:     3 worst case (2 in main + 1 for interrupts)
+               ROM used:   2194 bytes (7%)
+                           Largest free fragment is 30570
+               RAM used:   197 (13%) at main() level
+                           237 (15%) worst case
+               Stack:     5 worst case (4 in main + 1 for interrupts)
 
 *
-0000:  GOTO   0498
+0000:  GOTO   07F0
 *
 0008:  MOVWF  04
 000A:  MOVFF  FD8,05
@@ -34,7 +34,7 @@ CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
 0054:  BTFSS  F9D.1
 0056:  GOTO   0060
 005A:  BTFSC  F9E.1
-005C:  GOTO   00FE
+005C:  GOTO   00FA
 0060:  BTFSS  F9D.5
 0062:  GOTO   006C
 0066:  BTFSC  F9E.5
@@ -1057,67 +1057,265 @@ CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
 ....................    char c; 
 ....................  
 ....................    index = 0; 
+*
+02CA:  CLRF   xD2
 ....................    sign = 0; 
+02CC:  CLRF   xD0
 ....................    base = 10; 
+02CE:  MOVLW  0A
+02D0:  MOVWF  xD1
 ....................    result = 0; 
+02D2:  CLRF   xCF
 ....................  
 ....................    if (!s) 
+02D4:  MOVF   xCD,W
+02D6:  IORWF  xCE,W
+02D8:  BNZ   02E0
 ....................       return 0; 
+02DA:  MOVLW  00
+02DC:  MOVWF  01
+02DE:  BRA    0462
 ....................    // Omit all preceeding alpha characters 
 ....................    c = s[index++]; 
+02E0:  MOVF   xD2,W
+02E2:  INCF   xD2,F
+02E4:  CLRF   03
+02E6:  ADDWF  xCD,W
+02E8:  MOVWF  FE9
+02EA:  MOVF   xCE,W
+02EC:  ADDWFC 03,W
+02EE:  MOVWF  FEA
+02F0:  MOVFF  FEF,D3
 ....................  
 ....................    // increase index if either positive or negative sign is detected 
 ....................    if (c == '-') 
+02F4:  MOVF   xD3,W
+02F6:  SUBLW  2D
+02F8:  BNZ   0314
 ....................    { 
 ....................       sign = 1;         // Set the sign to negative 
+02FA:  MOVLW  01
+02FC:  MOVWF  xD0
 ....................       c = s[index++]; 
+02FE:  MOVF   xD2,W
+0300:  INCF   xD2,F
+0302:  CLRF   03
+0304:  ADDWF  xCD,W
+0306:  MOVWF  FE9
+0308:  MOVF   xCE,W
+030A:  ADDWFC 03,W
+030C:  MOVWF  FEA
+030E:  MOVFF  FEF,D3
 ....................    } 
 ....................    else if (c == '+') 
+0312:  BRA    032E
+0314:  MOVF   xD3,W
+0316:  SUBLW  2B
+0318:  BNZ   032E
 ....................    { 
 ....................       c = s[index++]; 
+031A:  MOVF   xD2,W
+031C:  INCF   xD2,F
+031E:  CLRF   03
+0320:  ADDWF  xCD,W
+0322:  MOVWF  FE9
+0324:  MOVF   xCE,W
+0326:  ADDWFC 03,W
+0328:  MOVWF  FEA
+032A:  MOVFF  FEF,D3
 ....................    } 
 ....................  
 ....................    if (c >= '0' && c <= '9') 
+032E:  MOVF   xD3,W
+0330:  SUBLW  2F
+0332:  BTFSC  FD8.0
+0334:  BRA    0452
+0336:  MOVF   xD3,W
+0338:  SUBLW  39
+033A:  BTFSS  FD8.0
+033C:  BRA    0452
 ....................    { 
 ....................  
 ....................       // Check for hexa number 
 ....................       if (c == '0' && (s[index] == 'x' || s[index] == 'X')) 
+033E:  MOVF   xD3,W
+0340:  SUBLW  30
+0342:  BNZ   0386
+0344:  CLRF   03
+0346:  MOVF   xD2,W
+0348:  ADDWF  xCD,W
+034A:  MOVWF  FE9
+034C:  MOVF   xCE,W
+034E:  ADDWFC 03,W
+0350:  MOVWF  FEA
+0352:  MOVF   FEF,W
+0354:  SUBLW  78
+0356:  BZ    036C
+0358:  CLRF   03
+035A:  MOVF   xD2,W
+035C:  ADDWF  xCD,W
+035E:  MOVWF  FE9
+0360:  MOVF   xCE,W
+0362:  ADDWFC 03,W
+0364:  MOVWF  FEA
+0366:  MOVF   FEF,W
+0368:  SUBLW  58
+036A:  BNZ   0386
 ....................       { 
 ....................          base = 16; 
+036C:  MOVLW  10
+036E:  MOVWF  xD1
 ....................          index++; 
+0370:  INCF   xD2,F
 ....................          c = s[index++]; 
+0372:  MOVF   xD2,W
+0374:  INCF   xD2,F
+0376:  CLRF   03
+0378:  ADDWF  xCD,W
+037A:  MOVWF  FE9
+037C:  MOVF   xCE,W
+037E:  ADDWFC 03,W
+0380:  MOVWF  FEA
+0382:  MOVFF  FEF,D3
 ....................       } 
 ....................  
 ....................       // The number is a decimal number 
 ....................       if (base == 10) 
+0386:  MOVF   xD1,W
+0388:  SUBLW  0A
+038A:  BNZ   03C2
 ....................       { 
 ....................          while (c >= '0' && c <= '9') 
 ....................          { 
+038C:  MOVF   xD3,W
+038E:  SUBLW  2F
+0390:  BC    03C0
+0392:  MOVF   xD3,W
+0394:  SUBLW  39
+0396:  BNC   03C0
 ....................             result = 10*result + (c - '0'); 
+0398:  MOVLW  0A
+039A:  MOVWF  xD4
+039C:  MOVFF  CF,D5
+03A0:  BRA    027E
+03A2:  MOVLW  30
+03A4:  SUBWF  xD3,W
+03A6:  ADDWF  01,W
+03A8:  MOVWF  xCF
 ....................             c = s[index++]; 
+03AA:  MOVF   xD2,W
+03AC:  INCF   xD2,F
+03AE:  CLRF   03
+03B0:  ADDWF  xCD,W
+03B2:  MOVWF  FE9
+03B4:  MOVF   xCE,W
+03B6:  ADDWFC 03,W
+03B8:  MOVWF  FEA
+03BA:  MOVFF  FEF,D3
 ....................          } 
+03BE:  BRA    038C
 ....................       } 
 ....................       else if (base == 16)    // The number is a hexa number 
+03C0:  BRA    0452
+03C2:  MOVF   xD1,W
+03C4:  SUBLW  10
+03C6:  BNZ   0452
 ....................       { 
 ....................          c = toupper(c); 
+03C8:  MOVF   xD3,W
+03CA:  SUBLW  60
+03CC:  BC    03DA
+03CE:  MOVF   xD3,W
+03D0:  SUBLW  7A
+03D2:  BNC   03DA
+03D4:  MOVF   xD3,W
+03D6:  ANDLW  DF
+03D8:  BRA    03DC
+03DA:  MOVF   xD3,W
+03DC:  MOVWF  xD3
 ....................          while ( (c >= '0' && c <= '9') || (c >= 'A' && c<='F')) 
 ....................          { 
+03DE:  MOVF   xD3,W
+03E0:  SUBLW  2F
+03E2:  BC    03EA
+03E4:  MOVF   xD3,W
+03E6:  SUBLW  39
+03E8:  BC    03F6
+03EA:  MOVF   xD3,W
+03EC:  SUBLW  40
+03EE:  BC    0452
+03F0:  MOVF   xD3,W
+03F2:  SUBLW  46
+03F4:  BNC   0452
 ....................             if (c >= '0' && c <= '9') 
+03F6:  MOVF   xD3,W
+03F8:  SUBLW  2F
+03FA:  BC    0414
+03FC:  MOVF   xD3,W
+03FE:  SUBLW  39
+0400:  BNC   0414
 ....................                result = (result << 4) + (c - '0'); 
+0402:  SWAPF  xCF,W
+0404:  MOVWF  xD4
+0406:  MOVLW  F0
+0408:  ANDWF  xD4,F
+040A:  MOVLW  30
+040C:  SUBWF  xD3,W
+040E:  ADDWF  xD4,W
+0410:  MOVWF  xCF
 ....................             else 
+0412:  BRA    0426
 ....................                result = (result << 4) + (c - 'A' + 10); 
+0414:  SWAPF  xCF,W
+0416:  MOVWF  xD4
+0418:  MOVLW  F0
+041A:  ANDWF  xD4,F
+041C:  MOVLW  41
+041E:  SUBWF  xD3,W
+0420:  ADDLW  0A
+0422:  ADDWF  xD4,W
+0424:  MOVWF  xCF
 ....................  
 ....................             c = s[index++]; 
+0426:  MOVF   xD2,W
+0428:  INCF   xD2,F
+042A:  CLRF   03
+042C:  ADDWF  xCD,W
+042E:  MOVWF  FE9
+0430:  MOVF   xCE,W
+0432:  ADDWFC 03,W
+0434:  MOVWF  FEA
+0436:  MOVFF  FEF,D3
 ....................             c = toupper(c); 
+043A:  MOVF   xD3,W
+043C:  SUBLW  60
+043E:  BC    044C
+0440:  MOVF   xD3,W
+0442:  SUBLW  7A
+0444:  BNC   044C
+0446:  MOVF   xD3,W
+0448:  ANDLW  DF
+044A:  BRA    044E
+044C:  MOVF   xD3,W
+044E:  MOVWF  xD3
 ....................          } 
+0450:  BRA    03DE
 ....................       } 
 ....................    } 
 ....................  
 ....................    if (sign == 1 && base == 10) 
+0452:  DECFSZ xD0,W
+0454:  BRA    045E
+0456:  MOVF   xD1,W
+0458:  SUBLW  0A
+045A:  BNZ   045E
 ....................        result = -result; 
+045C:  NEGF   xCF
 ....................  
 ....................    return(result); 
+045E:  MOVFF  CF,01
 .................... } 
+0462:  GOTO   04B8 (RETURN)
 ....................  
 .................... signed long atol(char *s) 
 .................... { 
@@ -1127,300 +1325,296 @@ CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
 ....................  
 ....................    index = 0; 
 *
-016C:  MOVLB  1
-016E:  CLRF   x5F
+0516:  CLRF   xE3
 ....................    sign = 0; 
-0170:  CLRF   x5D
+0518:  CLRF   xE1
 ....................    base = 10; 
-0172:  MOVLW  0A
-0174:  MOVWF  x5E
+051A:  MOVLW  0A
+051C:  MOVWF  xE2
 ....................    result = 0; 
-0176:  CLRF   x5C
-0178:  CLRF   x5B
+051E:  CLRF   xE0
+0520:  CLRF   xDF
 ....................  
 ....................    if (!s) 
-017A:  MOVF   x59,W
-017C:  IORWF  x5A,W
-017E:  BNZ   0188
+0522:  MOVF   xDD,W
+0524:  IORWF  xDE,W
+0526:  BNZ   0530
 ....................       return 0; 
-0180:  MOVLW  00
-0182:  MOVWF  01
-0184:  MOVWF  02
-0186:  BRA    035A
+0528:  MOVLW  00
+052A:  MOVWF  01
+052C:  MOVWF  02
+052E:  BRA    06FE
 ....................    c = s[index++]; 
-0188:  MOVF   x5F,W
-018A:  INCF   x5F,F
-018C:  CLRF   03
-018E:  ADDWF  x59,W
-0190:  MOVWF  FE9
-0192:  MOVF   x5A,W
-0194:  ADDWFC 03,W
-0196:  MOVWF  FEA
-0198:  MOVFF  FEF,160
+0530:  MOVF   xE3,W
+0532:  INCF   xE3,F
+0534:  CLRF   03
+0536:  ADDWF  xDD,W
+0538:  MOVWF  FE9
+053A:  MOVF   xDE,W
+053C:  ADDWFC 03,W
+053E:  MOVWF  FEA
+0540:  MOVFF  FEF,E4
 ....................  
 ....................    // increase index if either positive or negative sign is detected 
 ....................    if (c == '-') 
-019C:  MOVF   x60,W
-019E:  SUBLW  2D
-01A0:  BNZ   01BC
+0544:  MOVF   xE4,W
+0546:  SUBLW  2D
+0548:  BNZ   0564
 ....................    { 
 ....................       sign = 1;         // Set the sign to negative 
-01A2:  MOVLW  01
-01A4:  MOVWF  x5D
+054A:  MOVLW  01
+054C:  MOVWF  xE1
 ....................       c = s[index++]; 
-01A6:  MOVF   x5F,W
-01A8:  INCF   x5F,F
-01AA:  CLRF   03
-01AC:  ADDWF  x59,W
-01AE:  MOVWF  FE9
-01B0:  MOVF   x5A,W
-01B2:  ADDWFC 03,W
-01B4:  MOVWF  FEA
-01B6:  MOVFF  FEF,160
+054E:  MOVF   xE3,W
+0550:  INCF   xE3,F
+0552:  CLRF   03
+0554:  ADDWF  xDD,W
+0556:  MOVWF  FE9
+0558:  MOVF   xDE,W
+055A:  ADDWFC 03,W
+055C:  MOVWF  FEA
+055E:  MOVFF  FEF,E4
 ....................    } 
 ....................    else if (c == '+') 
-01BA:  BRA    01D6
-01BC:  MOVF   x60,W
-01BE:  SUBLW  2B
-01C0:  BNZ   01D6
+0562:  BRA    057E
+0564:  MOVF   xE4,W
+0566:  SUBLW  2B
+0568:  BNZ   057E
 ....................    { 
 ....................       c = s[index++]; 
-01C2:  MOVF   x5F,W
-01C4:  INCF   x5F,F
-01C6:  CLRF   03
-01C8:  ADDWF  x59,W
-01CA:  MOVWF  FE9
-01CC:  MOVF   x5A,W
-01CE:  ADDWFC 03,W
-01D0:  MOVWF  FEA
-01D2:  MOVFF  FEF,160
+056A:  MOVF   xE3,W
+056C:  INCF   xE3,F
+056E:  CLRF   03
+0570:  ADDWF  xDD,W
+0572:  MOVWF  FE9
+0574:  MOVF   xDE,W
+0576:  ADDWFC 03,W
+0578:  MOVWF  FEA
+057A:  MOVFF  FEF,E4
 ....................    } 
 ....................  
 ....................    if (c >= '0' && c <= '9') 
-01D6:  MOVF   x60,W
-01D8:  SUBLW  2F
-01DA:  BTFSC  FD8.0
-01DC:  BRA    033E
-01DE:  MOVF   x60,W
-01E0:  SUBLW  39
-01E2:  BTFSS  FD8.0
-01E4:  BRA    033E
+057E:  MOVF   xE4,W
+0580:  SUBLW  2F
+0582:  BTFSC  FD8.0
+0584:  BRA    06E2
+0586:  MOVF   xE4,W
+0588:  SUBLW  39
+058A:  BTFSS  FD8.0
+058C:  BRA    06E2
 ....................    { 
 ....................       if (c == '0' && (s[index] == 'x' || s[index] == 'X')) 
-01E6:  MOVF   x60,W
-01E8:  SUBLW  30
-01EA:  BNZ   022E
-01EC:  CLRF   03
-01EE:  MOVF   x5F,W
-01F0:  ADDWF  x59,W
-01F2:  MOVWF  FE9
-01F4:  MOVF   x5A,W
-01F6:  ADDWFC 03,W
-01F8:  MOVWF  FEA
-01FA:  MOVF   FEF,W
-01FC:  SUBLW  78
-01FE:  BZ    0214
-0200:  CLRF   03
-0202:  MOVF   x5F,W
-0204:  ADDWF  x59,W
-0206:  MOVWF  FE9
-0208:  MOVF   x5A,W
-020A:  ADDWFC 03,W
-020C:  MOVWF  FEA
-020E:  MOVF   FEF,W
-0210:  SUBLW  58
-0212:  BNZ   022E
+058E:  MOVF   xE4,W
+0590:  SUBLW  30
+0592:  BNZ   05D6
+0594:  CLRF   03
+0596:  MOVF   xE3,W
+0598:  ADDWF  xDD,W
+059A:  MOVWF  FE9
+059C:  MOVF   xDE,W
+059E:  ADDWFC 03,W
+05A0:  MOVWF  FEA
+05A2:  MOVF   FEF,W
+05A4:  SUBLW  78
+05A6:  BZ    05BC
+05A8:  CLRF   03
+05AA:  MOVF   xE3,W
+05AC:  ADDWF  xDD,W
+05AE:  MOVWF  FE9
+05B0:  MOVF   xDE,W
+05B2:  ADDWFC 03,W
+05B4:  MOVWF  FEA
+05B6:  MOVF   FEF,W
+05B8:  SUBLW  58
+05BA:  BNZ   05D6
 ....................       { 
 ....................          base = 16; 
-0214:  MOVLW  10
-0216:  MOVWF  x5E
+05BC:  MOVLW  10
+05BE:  MOVWF  xE2
 ....................          index++; 
-0218:  INCF   x5F,F
+05C0:  INCF   xE3,F
 ....................          c = s[index++]; 
-021A:  MOVF   x5F,W
-021C:  INCF   x5F,F
-021E:  CLRF   03
-0220:  ADDWF  x59,W
-0222:  MOVWF  FE9
-0224:  MOVF   x5A,W
-0226:  ADDWFC 03,W
-0228:  MOVWF  FEA
-022A:  MOVFF  FEF,160
+05C2:  MOVF   xE3,W
+05C4:  INCF   xE3,F
+05C6:  CLRF   03
+05C8:  ADDWF  xDD,W
+05CA:  MOVWF  FE9
+05CC:  MOVF   xDE,W
+05CE:  ADDWFC 03,W
+05D0:  MOVWF  FEA
+05D2:  MOVFF  FEF,E4
 ....................       } 
 ....................  
 ....................       // The number is a decimal number 
 ....................       if (base == 10) 
-022E:  MOVF   x5E,W
-0230:  SUBLW  0A
-0232:  BNZ   027A
+05D6:  MOVF   xE2,W
+05D8:  SUBLW  0A
+05DA:  BNZ   061E
 ....................       { 
 ....................          while (c >= '0' && c <= '9') 
 ....................          { 
-0234:  MOVF   x60,W
-0236:  SUBLW  2F
-0238:  BC    0278
-023A:  MOVF   x60,W
-023C:  SUBLW  39
-023E:  BNC   0278
+05DC:  MOVF   xE4,W
+05DE:  SUBLW  2F
+05E0:  BC    061C
+05E2:  MOVF   xE4,W
+05E4:  SUBLW  39
+05E6:  BNC   061C
 ....................             result = 10*result + (c - '0'); 
-0240:  CLRF   x62
-0242:  MOVLW  0A
-0244:  MOVWF  x61
-0246:  MOVFF  15C,164
-024A:  MOVFF  15B,163
-024E:  MOVLB  0
-0250:  BRA    0116
-0252:  MOVLW  30
-0254:  MOVLB  1
-0256:  SUBWF  x60,W
-0258:  ADDWF  01,W
-025A:  MOVWF  x5B
-025C:  MOVLW  00
-025E:  ADDWFC 02,W
-0260:  MOVWF  x5C
+05E8:  CLRF   xE6
+05EA:  MOVLW  0A
+05EC:  MOVWF  xE5
+05EE:  MOVFF  E0,E8
+05F2:  MOVFF  DF,E7
+05F6:  BRA    04C4
+05F8:  MOVLW  30
+05FA:  SUBWF  xE4,W
+05FC:  ADDWF  01,W
+05FE:  MOVWF  xDF
+0600:  MOVLW  00
+0602:  ADDWFC 02,W
+0604:  MOVWF  xE0
 ....................             c = s[index++]; 
-0262:  MOVF   x5F,W
-0264:  INCF   x5F,F
-0266:  CLRF   03
-0268:  ADDWF  x59,W
-026A:  MOVWF  FE9
-026C:  MOVF   x5A,W
-026E:  ADDWFC 03,W
-0270:  MOVWF  FEA
-0272:  MOVFF  FEF,160
+0606:  MOVF   xE3,W
+0608:  INCF   xE3,F
+060A:  CLRF   03
+060C:  ADDWF  xDD,W
+060E:  MOVWF  FE9
+0610:  MOVF   xDE,W
+0612:  ADDWFC 03,W
+0614:  MOVWF  FEA
+0616:  MOVFF  FEF,E4
 ....................          } 
-0276:  BRA    0234
+061A:  BRA    05DC
 ....................       } 
 ....................       else if (base == 16)    // The number is a hexa number 
-0278:  BRA    033E
-027A:  MOVF   x5E,W
-027C:  SUBLW  10
-027E:  BNZ   033E
+061C:  BRA    06E2
+061E:  MOVF   xE2,W
+0620:  SUBLW  10
+0622:  BNZ   06E2
 ....................       { 
 ....................          c = toupper(c); 
-0280:  MOVF   x60,W
-0282:  SUBLW  60
-0284:  BC    0292
-0286:  MOVF   x60,W
-0288:  SUBLW  7A
-028A:  BNC   0292
-028C:  MOVF   x60,W
-028E:  ANDLW  DF
-0290:  BRA    0294
-0292:  MOVF   x60,W
-0294:  MOVWF  x60
+0624:  MOVF   xE4,W
+0626:  SUBLW  60
+0628:  BC    0636
+062A:  MOVF   xE4,W
+062C:  SUBLW  7A
+062E:  BNC   0636
+0630:  MOVF   xE4,W
+0632:  ANDLW  DF
+0634:  BRA    0638
+0636:  MOVF   xE4,W
+0638:  MOVWF  xE4
 ....................          while ( (c >= '0' && c <= '9') || (c >= 'A' && c <='F')) 
 ....................          { 
-0296:  MOVF   x60,W
-0298:  SUBLW  2F
-029A:  BC    02A2
-029C:  MOVF   x60,W
-029E:  SUBLW  39
-02A0:  BC    02AE
-02A2:  MOVF   x60,W
-02A4:  SUBLW  40
-02A6:  BC    033E
-02A8:  MOVF   x60,W
-02AA:  SUBLW  46
-02AC:  BNC   033E
+063A:  MOVF   xE4,W
+063C:  SUBLW  2F
+063E:  BC    0646
+0640:  MOVF   xE4,W
+0642:  SUBLW  39
+0644:  BC    0652
+0646:  MOVF   xE4,W
+0648:  SUBLW  40
+064A:  BC    06E2
+064C:  MOVF   xE4,W
+064E:  SUBLW  46
+0650:  BNC   06E2
 ....................             if (c >= '0' && c <= '9') 
-02AE:  MOVF   x60,W
-02B0:  SUBLW  2F
-02B2:  BC    02E6
-02B4:  MOVF   x60,W
-02B6:  SUBLW  39
-02B8:  BNC   02E6
+0652:  MOVF   xE4,W
+0654:  SUBLW  2F
+0656:  BC    068A
+0658:  MOVF   xE4,W
+065A:  SUBLW  39
+065C:  BNC   068A
 ....................                result = (result << 4) + (c - '0'); 
-02BA:  RLCF   x5B,W
-02BC:  MOVWF  x61
-02BE:  RLCF   x5C,W
-02C0:  MOVWF  x62
-02C2:  RLCF   x61,F
-02C4:  RLCF   x62,F
-02C6:  RLCF   x61,F
-02C8:  RLCF   x62,F
-02CA:  RLCF   x61,F
-02CC:  RLCF   x62,F
-02CE:  MOVLW  F0
-02D0:  ANDWF  x61,F
-02D2:  MOVLW  30
-02D4:  SUBWF  x60,W
-02D6:  ADDWF  x61,W
-02D8:  MOVWF  01
-02DA:  MOVLW  00
-02DC:  ADDWFC x62,W
-02DE:  MOVFF  01,15B
-02E2:  MOVWF  x5C
+065E:  RLCF   xDF,W
+0660:  MOVWF  xE5
+0662:  RLCF   xE0,W
+0664:  MOVWF  xE6
+0666:  RLCF   xE5,F
+0668:  RLCF   xE6,F
+066A:  RLCF   xE5,F
+066C:  RLCF   xE6,F
+066E:  RLCF   xE5,F
+0670:  RLCF   xE6,F
+0672:  MOVLW  F0
+0674:  ANDWF  xE5,F
+0676:  MOVLW  30
+0678:  SUBWF  xE4,W
+067A:  ADDWF  xE5,W
+067C:  MOVWF  01
+067E:  MOVLW  00
+0680:  ADDWFC xE6,W
+0682:  MOVFF  01,DF
+0686:  MOVWF  xE0
 ....................             else 
-02E4:  BRA    0312
+0688:  BRA    06B6
 ....................                result = (result << 4) + (c - 'A' + 10); 
-02E6:  RLCF   x5B,W
-02E8:  MOVWF  x61
-02EA:  RLCF   x5C,W
-02EC:  MOVWF  x62
-02EE:  RLCF   x61,F
-02F0:  RLCF   x62,F
-02F2:  RLCF   x61,F
-02F4:  RLCF   x62,F
-02F6:  RLCF   x61,F
-02F8:  RLCF   x62,F
-02FA:  MOVLW  F0
-02FC:  ANDWF  x61,F
-02FE:  MOVLW  41
-0300:  SUBWF  x60,W
-0302:  ADDLW  0A
-0304:  ADDWF  x61,W
-0306:  MOVWF  01
-0308:  MOVLW  00
-030A:  ADDWFC x62,W
-030C:  MOVFF  01,15B
-0310:  MOVWF  x5C
+068A:  RLCF   xDF,W
+068C:  MOVWF  xE5
+068E:  RLCF   xE0,W
+0690:  MOVWF  xE6
+0692:  RLCF   xE5,F
+0694:  RLCF   xE6,F
+0696:  RLCF   xE5,F
+0698:  RLCF   xE6,F
+069A:  RLCF   xE5,F
+069C:  RLCF   xE6,F
+069E:  MOVLW  F0
+06A0:  ANDWF  xE5,F
+06A2:  MOVLW  41
+06A4:  SUBWF  xE4,W
+06A6:  ADDLW  0A
+06A8:  ADDWF  xE5,W
+06AA:  MOVWF  01
+06AC:  MOVLW  00
+06AE:  ADDWFC xE6,W
+06B0:  MOVFF  01,DF
+06B4:  MOVWF  xE0
 ....................  
 ....................             c = s[index++];c = toupper(c); 
-0312:  MOVF   x5F,W
-0314:  INCF   x5F,F
-0316:  CLRF   03
-0318:  ADDWF  x59,W
-031A:  MOVWF  FE9
-031C:  MOVF   x5A,W
-031E:  ADDWFC 03,W
-0320:  MOVWF  FEA
-0322:  MOVFF  FEF,160
-0326:  MOVF   x60,W
-0328:  SUBLW  60
-032A:  BC    0338
-032C:  MOVF   x60,W
-032E:  SUBLW  7A
-0330:  BNC   0338
-0332:  MOVF   x60,W
-0334:  ANDLW  DF
-0336:  BRA    033A
-0338:  MOVF   x60,W
-033A:  MOVWF  x60
+06B6:  MOVF   xE3,W
+06B8:  INCF   xE3,F
+06BA:  CLRF   03
+06BC:  ADDWF  xDD,W
+06BE:  MOVWF  FE9
+06C0:  MOVF   xDE,W
+06C2:  ADDWFC 03,W
+06C4:  MOVWF  FEA
+06C6:  MOVFF  FEF,E4
+06CA:  MOVF   xE4,W
+06CC:  SUBLW  60
+06CE:  BC    06DC
+06D0:  MOVF   xE4,W
+06D2:  SUBLW  7A
+06D4:  BNC   06DC
+06D6:  MOVF   xE4,W
+06D8:  ANDLW  DF
+06DA:  BRA    06DE
+06DC:  MOVF   xE4,W
+06DE:  MOVWF  xE4
 ....................          } 
-033C:  BRA    0296
+06E0:  BRA    063A
 ....................       } 
 ....................    } 
 ....................  
 ....................    if (base == 10 && sign == 1) 
-033E:  MOVF   x5E,W
-0340:  SUBLW  0A
-0342:  BNZ   0352
-0344:  DECFSZ x5D,W
-0346:  BRA    0352
+06E2:  MOVF   xE2,W
+06E4:  SUBLW  0A
+06E6:  BNZ   06F6
+06E8:  DECFSZ xE1,W
+06EA:  BRA    06F6
 ....................       result = -result; 
-0348:  COMF   x5B,F
-034A:  COMF   x5C,F
-034C:  INCF   x5B,F
-034E:  BTFSC  FD8.2
-0350:  INCF   x5C,F
+06EC:  COMF   xDF,F
+06EE:  COMF   xE0,F
+06F0:  INCF   xDF,F
+06F2:  BTFSC  FD8.2
+06F4:  INCF   xE0,F
 ....................  
 ....................    return(result); 
-0352:  MOVFF  15B,01
-0356:  MOVFF  15C,02
+06F6:  MOVFF  DF,01
+06FA:  MOVFF  E0,02
 .................... } 
-035A:  MOVLB  0
-035C:  GOTO   054C (RETURN)
+06FE:  GOTO   0758 (RETURN)
 ....................  
 .................... /* A fast routine to multiply by 10 
 ....................  */ 
@@ -2214,35 +2408,46 @@ CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
 ....................  
 .................... #fuses HS 
 .................... #use delay(clock=15MHz) 
-0360:  MOVLW  01
-0362:  MOVWF  FEA
-0364:  MOVLW  5B
-0366:  MOVWF  FE9
-0368:  MOVF   FEF,W
-036A:  BZ    0388
-036C:  MOVLW  04
-036E:  MOVWF  01
-0370:  CLRF   00
-0372:  DECFSZ 00,F
-0374:  BRA    0372
-0376:  DECFSZ 01,F
-0378:  BRA    0370
-037A:  MOVLW  DC
-037C:  MOVWF  00
-037E:  DECFSZ 00,F
-0380:  BRA    037E
-0382:  NOP   
-0384:  DECFSZ FEF,F
-0386:  BRA    036C
-0388:  RETURN 0
+*
+010E:  CLRF   FEA
+0110:  MOVLW  C7
+0112:  MOVWF  FE9
+0114:  MOVF   FEF,W
+0116:  BZ    0134
+0118:  MOVLW  04
+011A:  MOVWF  01
+011C:  CLRF   00
+011E:  DECFSZ 00,F
+0120:  BRA    011E
+0122:  DECFSZ 01,F
+0124:  BRA    011C
+0126:  MOVLW  DC
+0128:  MOVWF  00
+012A:  DECFSZ 00,F
+012C:  BRA    012A
+012E:  NOP   
+0130:  DECFSZ FEF,F
+0132:  BRA    0118
+0134:  RETURN 0
 .................... #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7) 
 ....................  
+.................... #include "definicoes.c" 
+.................... /* 
+....................  * definicoes.c 
+....................  * 
+....................  *  Created on: 20/08/2014 
+....................  *      Author: cuki 
+....................  */ 
+....................  
 .................... //defines 
-.................... #define buffer_size 256 
+.................... #define buffer_size 128 
+.................... #define vbto_parar 0 
+.................... #define max_slv	16 
 .................... //cmd 
 .................... #define cmd_parar	0x00 
 .................... #define cmd_subir	0x01 
 .................... #define cmd_descer	0x02 
+.................... #define cmd_pos		0x03 
 .................... //entradas 
 .................... #define bto_sobe	PIN_B0 
 .................... #define bto_desce	PIN_B1 
@@ -2252,347 +2457,549 @@ CCS PCH C Compiler, Version 4.140, 22098               18-ago-14 16:19
 .................... //tempos 
 .................... #define debounce 100 
 ....................  
+.................... #include "variaveis.c" 
+.................... /* 
+....................  * variaveis.c 
+....................  * 
+....................  *  Created on: 20/08/2014 
+....................  *      Author: cuki 
+....................  */ 
+....................  
 .................... int buffer[buffer_size]; 
 .................... int line = 0; 
-.................... int lido = 0; 
-.................... int add_slv = 2; 
+.................... int addr = 1; 
+.................... int r_addr = 10; 
 ....................  
 .................... short recived = FALSE; 
 .................... short en_timer2 = TRUE; 
-.................... short send_stp = TRUE; 
-.................... short ctrl_bto = FALSE; 
+.................... //mestre 
+.................... int nrSlaves = 1; 
+.................... int i = 0; 
+....................  
+.................... long pos_elev[max_slv]; 
+....................  
+....................  
+.................... #include "interrupcoes.c" 
+.................... /* 
+....................  * interrupcoes.c 
+....................  * 
+....................  *  Created on: 20/08/2014 
+....................  *      Author: cuki 
+....................  */ 
 ....................  
 .................... #INT_RDA 
 .................... void serial_isr() { 
 .................... 	clear_interrupt(INT_RDA); 
 .................... 	buffer[line++] = getc(); 
 *
-00BA:  MOVLB  1
-00BC:  MOVF   x1F,W
-00BE:  INCF   x1F,F
-00C0:  CLRF   03
-00C2:  ADDLW  1F
-00C4:  MOVWF  FE9
-00C6:  MOVLW  00
-00C8:  ADDWFC 03,W
-00CA:  MOVWF  FEA
-00CC:  BTFSS  F9E.5
-00CE:  BRA    00CC
-00D0:  MOVFF  FAE,FEF
+00BA:  MOVF   x9F,W
+00BC:  INCF   x9F,F
+00BE:  CLRF   03
+00C0:  ADDLW  1F
+00C2:  MOVWF  FE9
+00C4:  MOVLW  00
+00C6:  ADDWFC 03,W
+00C8:  MOVWF  FEA
+00CA:  BTFSS  F9E.5
+00CC:  BRA    00CA
+00CE:  MOVFF  FAE,FEF
 .................... 	buffer[line] = '\0'; 
-00D4:  CLRF   03
-00D6:  MOVF   x1F,W
-00D8:  ADDLW  1F
-00DA:  MOVWF  FE9
-00DC:  MOVLW  00
-00DE:  ADDWFC 03,W
-00E0:  MOVWF  FEA
-00E2:  CLRF   FEF
+00D2:  CLRF   03
+00D4:  MOVF   x9F,W
+00D6:  ADDLW  1F
+00D8:  MOVWF  FE9
+00DA:  MOVLW  00
+00DC:  ADDWFC 03,W
+00DE:  MOVWF  FEA
+00E0:  CLRF   FEF
 .................... 	set_timer2(0); 
-00E4:  CLRF   FCC
+00E2:  CLRF   FCC
 .................... 	if (en_timer2) { 
-00E6:  BTFSS  x22.1
-00E8:  BRA    00F6
+00E4:  BTFSS  xA2.1
+00E6:  BRA    00F4
 .................... 		en_timer2 = FALSE; 
-00EA:  BCF    x22.1
+00E8:  BCF    xA2.1
 .................... 		setup_timer_2(T2_DIV_BY_16, 255, 1); 
-00EC:  MOVLW  00
-00EE:  IORLW  06
-00F0:  MOVWF  FCA
-00F2:  MOVLW  FF
-00F4:  MOVWF  FCB
+00EA:  MOVLW  00
+00EC:  IORLW  06
+00EE:  MOVWF  FCA
+00F0:  MOVLW  FF
+00F2:  MOVWF  FCB
 .................... 	} 
 .................... } 
 ....................  
-00F6:  BCF    F9E.5
-00F8:  MOVLB  0
-00FA:  GOTO   006C
+00F4:  BCF    F9E.5
+00F6:  GOTO   006C
 .................... #INT_TIMER2 
 .................... void timer2_isr() { 
 .................... 	clear_interrupt(INT_TIMER2); 
-00FE:  BCF    F9E.1
+00FA:  BCF    F9E.1
 .................... 	setup_timer_2(T2_DISABLED, 255, 1); 
-0100:  MOVLW  00
-0102:  MOVWF  FCA
-0104:  MOVLW  FF
-0106:  MOVWF  FCB
+00FC:  MOVLW  00
+00FE:  MOVWF  FCA
+0100:  MOVLW  FF
+0102:  MOVWF  FCB
 .................... 	set_timer2(0); 
-0108:  CLRF   FCC
+0104:  CLRF   FCC
 .................... 	recived = TRUE; 
-010A:  MOVLB  1
-010C:  BSF    x22.0
+0106:  BSF    xA2.0
 .................... } 
 ....................  
-010E:  BCF    F9E.1
-0110:  MOVLB  0
-0112:  GOTO   006C
+.................... #include "funcoes.c" 
+.................... /* 
+....................  * fucoes.c 
+....................  * 
+....................  *  Created on: 20/08/2014 
+....................  *      Author: cuki 
+....................  */ 
+....................  
+0108:  BCF    F9E.1
+010A:  GOTO   006C
+.................... int trans_addr(int *ptr) { 
+*
+0466:  SETF   xC8
+.................... 	int ret = 0xFF; 
+.................... 	int aux[2]; 
+.................... 	int *p; 
+....................  
+.................... 	for (p = ptr; *p != '\0'; p++) 
+0468:  MOVFF  C7,CC
+046C:  MOVFF  C6,CB
+0470:  MOVFF  CC,03
+0474:  MOVFF  CB,FE9
+0478:  MOVFF  CC,FEA
+047C:  MOVF   FEF,F
+047E:  BZ    0488
+.................... 		; 
+0480:  INCF   xCB,F
+0482:  BTFSC  FD8.2
+0484:  INCF   xCC,F
+0486:  BRA    0470
+....................  
+.................... 	aux[0] = *(p - 4); 
+0488:  MOVLW  04
+048A:  SUBWF  xCB,W
+048C:  MOVWF  00
+048E:  MOVLW  00
+0490:  SUBWFB xCC,W
+0492:  MOVFF  00,FE9
+0496:  MOVWF  FEA
+0498:  MOVFF  FEF,C9
+.................... 	aux[1] = *(p - 3); 
+049C:  MOVLW  03
+049E:  SUBWF  xCB,W
+04A0:  MOVWF  00
+04A2:  MOVLW  00
+04A4:  SUBWFB xCC,W
+04A6:  MOVFF  00,FE9
+04AA:  MOVWF  FEA
+04AC:  MOVFF  FEF,CA
+....................  
+.................... 	ret = atoi(aux); 
+04B0:  CLRF   xCE
+04B2:  MOVLW  C9
+04B4:  MOVWF  xCD
+04B6:  BRA    02CA
+04B8:  MOVFF  01,C8
+....................  
+.................... 	return ret; 
+04BC:  MOVFF  C8,01
+.................... } 
+04C0:  GOTO   07AE (RETURN)
+....................  
+.................... long trans_pos(int *ptr) { 
+*
+0702:  SETF   xCB
+0704:  SETF   xCA
+0706:  CLRF   xDC
+....................  
+.................... 	long ret = 0xFFFF; 
+.................... 	int posArray[16]; 
+.................... 	int i = 0; 
+....................  
+.................... 	for (i = 1; i < line; ++i) { 
+0708:  MOVLW  01
+070A:  MOVWF  xDC
+070C:  MOVF   x9F,W
+070E:  SUBWF  xDC,W
+0710:  BC    0750
+.................... 		posArray[i - 1] = *ptr[i]; 
+0712:  MOVLW  01
+0714:  SUBWF  xDC,W
+0716:  CLRF   03
+0718:  ADDLW  CC
+071A:  MOVWF  01
+071C:  MOVLW  00
+071E:  ADDWFC 03,F
+0720:  MOVFF  03,DE
+0724:  CLRF   03
+0726:  MOVF   xDC,W
+0728:  ADDWF  xC8,W
+072A:  MOVWF  FE9
+072C:  MOVF   xC9,W
+072E:  ADDWFC 03,W
+0730:  MOVWF  FEA
+0732:  MOVF   FEF,W
+0734:  CLRF   03
+0736:  MOVWF  FE9
+0738:  MOVFF  03,FEA
+073C:  MOVFF  FEF,DF
+0740:  MOVFF  DE,FEA
+0744:  MOVFF  01,FE9
+0748:  MOVFF  DF,FEF
+.................... 	} 
+074C:  INCF   xDC,F
+074E:  BRA    070C
+....................  
+.................... 	ret = atol(posArray); 
+0750:  CLRF   xDE
+0752:  MOVLW  CC
+0754:  MOVWF  xDD
+0756:  BRA    0516
+0758:  MOVFF  02,CB
+075C:  MOVFF  01,CA
+....................  
+.................... 	return ret; 
+0760:  MOVFF  CA,01
+0764:  MOVFF  CB,02
+.................... } 
+0768:  GOTO   07D0 (RETURN)
+....................  
+.................... int trans_cmd(int *ptr) { 
+.................... 	int ret = 0xFF; 
+.................... 	int aux[2]; 
+.................... 	int *p; 
+....................  
+.................... 	for (p = ptr; *p != '\0'; p++) 
+.................... 		; 
+....................  
+.................... 	aux[0] = *(p - 2); 
+.................... 	aux[1] = *(p - 1); 
+....................  
+.................... 	ret = atoi(aux); 
+....................  
+.................... 	return ret; 
+.................... } 
+....................  
+....................  
+.................... short send_stp = TRUE; 
+.................... short ctrl_bto = FALSE; 
+.................... short recolhe = FALSE; 
+....................  
 .................... int trata_bto() { 
 *
-038A:  BSF    F93.0
-038C:  MOVLB  1
-038E:  BCF    x59.0
-0390:  BTFSS  F81.0
-0392:  BSF    x59.0
-0394:  BSF    F93.1
-0396:  BCF    x59.1
-0398:  BTFSS  F81.1
-039A:  BSF    x59.1
-039C:  SETF   x5A
+0136:  BSF    F93.0
+0138:  BCF    xC5.0
+013A:  BTFSS  F81.0
+013C:  BSF    xC5.0
+013E:  BSF    F93.1
+0140:  BCF    xC5.1
+0142:  BTFSS  F81.1
+0144:  BSF    xC5.1
+0146:  SETF   xC6
 .................... 	short sobe = !input(bto_sobe); 
 .................... 	short desce = !input(bto_desce); 
 .................... 	int ret = 0xFF; 
 ....................  
 .................... 	if (sobe ^ desce) { 
-039E:  MOVLW  00
-03A0:  BTFSC  x59.0
-03A2:  MOVLW  01
-03A4:  MOVWF  x5C
-03A6:  MOVLW  00
-03A8:  BTFSC  x59.1
-03AA:  MOVLW  01
-03AC:  XORWF  x5C,W
-03AE:  BZ    03D8
-.................... 		delay_ms(debounce); 
-03B0:  MOVLW  64
-03B2:  MOVWF  x5B
-03B4:  MOVLB  0
-03B6:  RCALL  0360
-.................... 		if (!input(bto_sobe)) 
-03B8:  BSF    F93.0
-03BA:  BTFSC  F81.0
-03BC:  BRA    03C6
-.................... 			ret = bto_sobe; 
-03BE:  MOVLW  08
-03C0:  MOVLB  1
-03C2:  MOVWF  x5A
-03C4:  MOVLB  0
-.................... 		if (!input(bto_desce)) 
-03C6:  BSF    F93.1
-03C8:  BTFSC  F81.1
-03CA:  BRA    03D2
-.................... 			ret = bto_desce; 
-03CC:  MOVLW  09
-03CE:  MOVLB  1
-03D0:  MOVWF  x5A
-.................... 		ctrl_bto = TRUE; 
-03D2:  MOVLB  1
-03D4:  BSF    x22.3
-.................... 	} else if (!send_stp && ctrl_bto) { 
-03D6:  BRA    03E4
-03D8:  BTFSC  x22.2
-03DA:  BRA    03E4
-03DC:  BTFSS  x22.3
-03DE:  BRA    03E4
+0148:  MOVLW  00
+014A:  BTFSC  xC5.0
+014C:  MOVLW  01
+014E:  MOVWF  xC8
+0150:  MOVLW  00
+0152:  BTFSC  xC5.1
+0154:  MOVLW  01
+0156:  XORWF  xC8,W
+0158:  BZ    017C
+.................... 		if (!ctrl_bto) { 
+015A:  BTFSC  xA2.3
+015C:  BRA    017A
+.................... 			delay_ms(debounce); 
+015E:  MOVLW  64
+0160:  MOVWF  xC7
+0162:  RCALL  010E
+.................... 			if (!input(bto_sobe)) 
+0164:  BSF    F93.0
+0166:  BTFSC  F81.0
+0168:  BRA    016E
+.................... 				ret = bto_sobe; 
+016A:  MOVLW  08
+016C:  MOVWF  xC6
+.................... 			if (!input(bto_desce)) 
+016E:  BSF    F93.1
+0170:  BTFSC  F81.1
+0172:  BRA    0178
+.................... 				ret = bto_desce; 
+0174:  MOVLW  09
+0176:  MOVWF  xC6
+.................... 			ctrl_bto = TRUE; 
+0178:  BSF    xA2.3
+.................... 		} 
+.................... 	} else if (ctrl_bto) { 
+017A:  BRA    0184
+017C:  BTFSS  xA2.3
+017E:  BRA    0184
 .................... 		ctrl_bto = FALSE; 
-03E0:  BCF    x22.3
-.................... 		send_stp = TRUE; 
-03E2:  BSF    x22.2
+0180:  BCF    xA2.3
+.................... 		ret = vbto_parar; 
+0182:  CLRF   xC6
 .................... 	} 
 ....................  
 .................... 	return ret; 
-03E4:  MOVFF  15A,01
+0184:  MOVFF  C6,01
 .................... } 
-03E8:  MOVLB  0
-03EA:  GOTO   0560 (RETURN)
+0188:  GOTO   0858 (RETURN)
+....................  
+.................... void send(int iCmd) { 
+*
+0220:  CLRF   xC6
+.................... 	int i = 0; 
+.................... 	if (iCmd != cmd_parar) { 
+0222:  MOVF   xC5,F
+0224:  BZ    025A
+.................... 		for (i = 1; i <= nrSlaves; ++i) 
+0226:  MOVLW  01
+0228:  MOVWF  xC6
+022A:  MOVF   xC6,W
+022C:  SUBWF  xA3,W
+022E:  BNC   0258
+.................... 			printf("\n\r%02u%02u", i, iCmd); 
+0230:  MOVLW  0A
+0232:  BTFSS  F9E.4
+0234:  BRA    0232
+0236:  MOVWF  FAD
+0238:  MOVLW  0D
+023A:  BTFSS  F9E.4
+023C:  BRA    023A
+023E:  MOVWF  FAD
+0240:  MOVFF  C6,C7
+0244:  MOVLW  01
+0246:  MOVWF  xC8
+0248:  RCALL  01B4
+024A:  MOVFF  C5,C7
+024E:  MOVLW  01
+0250:  MOVWF  xC8
+0252:  RCALL  01B4
+0254:  INCF   xC6,F
+0256:  BRA    022A
+.................... 	} else 
+0258:  BRA    027C
+.................... 		printf("\n\r%02u%02u", 0, iCmd); 
+025A:  MOVLW  0A
+025C:  BTFSS  F9E.4
+025E:  BRA    025C
+0260:  MOVWF  FAD
+0262:  MOVLW  0D
+0264:  BTFSS  F9E.4
+0266:  BRA    0264
+0268:  MOVWF  FAD
+026A:  CLRF   xC7
+026C:  MOVLW  01
+026E:  MOVWF  xC8
+0270:  RCALL  01B4
+0272:  MOVFF  C5,C7
+0276:  MOVLW  01
+0278:  MOVWF  xC8
+027A:  RCALL  01B4
+.................... } 
+027C:  RETURN 0
+....................  
+.................... void read() { 
+*
+076C:  CLRF   xC5
+.................... 	int i = 0; 
+....................  
+.................... 	for (i = 1; i <= nrSlaves; ++i) { 
+076E:  MOVLW  01
+0770:  MOVWF  xC5
+0772:  MOVF   xC5,W
+0774:  SUBWF  xA3,W
+0776:  BNC   07EC
+.................... 		printf("\n\r%02u%02u", i, cmd_pos); 
+0778:  MOVLW  0A
+077A:  BTFSS  F9E.4
+077C:  BRA    077A
+077E:  MOVWF  FAD
+0780:  MOVLW  0D
+0782:  BTFSS  F9E.4
+0784:  BRA    0782
+0786:  MOVWF  FAD
+0788:  MOVFF  C5,C7
+078C:  MOVLW  01
+078E:  MOVWF  xC8
+0790:  RCALL  01B4
+0792:  MOVLW  03
+0794:  MOVWF  xC7
+0796:  MOVLW  01
+0798:  MOVWF  xC8
+079A:  RCALL  01B4
+....................  
+.................... 		while (!recived) 
+.................... 			; 
+079C:  BTFSS  xA2.0
+079E:  BRA    079C
+.................... 		if (recived) { 
+07A0:  BTFSS  xA2.0
+07A2:  BRA    07E8
+.................... 			recived = FALSE; 
+07A4:  BCF    xA2.0
+.................... 			r_addr = trans_addr(buffer); 
+07A6:  CLRF   xC7
+07A8:  MOVLW  1F
+07AA:  MOVWF  xC6
+07AC:  BRA    0466
+07AE:  MOVFF  01,A1
+.................... 			pos_elev[r_addr] = trans_pos(buffer); 
+07B2:  BCF    FD8.0
+07B4:  RLCF   xA1,W
+07B6:  CLRF   03
+07B8:  ADDLW  A5
+07BA:  MOVWF  01
+07BC:  MOVLW  00
+07BE:  ADDWFC 03,F
+07C0:  MOVFF  01,C6
+07C4:  MOVFF  03,C7
+07C8:  CLRF   xC9
+07CA:  MOVLW  1F
+07CC:  MOVWF  xC8
+07CE:  BRA    0702
+07D0:  MOVFF  C7,FEA
+07D4:  MOVFF  C6,FE9
+07D8:  MOVFF  02,FEC
+07DC:  MOVF   FED,F
+07DE:  MOVFF  01,FEF
+.................... 			buffer[0] = '\0'; 
+07E2:  CLRF   1F
+.................... 			line = 0; 
+07E4:  CLRF   x9F
+.................... 			en_timer2 = TRUE; 
+07E6:  BSF    xA2.1
+.................... 		} 
+.................... 	} 
+07E8:  INCF   xC5,F
+07EA:  BRA    0772
+.................... } 
+07EC:  GOTO   0888 (RETURN)
 ....................  
 .................... int main(void) { 
-*
-0498:  CLRF   FF8
-049A:  BCF    FD0.7
-049C:  BSF    07.7
-049E:  MOVLW  FE
-04A0:  MOVWF  00
-04A2:  MOVLW  06
-04A4:  MOVWF  01
-04A6:  MOVLW  02
-04A8:  MOVWF  FE9
-04AA:  MOVLW  00
-04AC:  MOVWF  FEA
-04AE:  CLRF   FEE
-04B0:  DECFSZ 00,F
-04B2:  BRA    04AE
-04B4:  DECFSZ 01,F
-04B6:  BRA    04AE
-04B8:  CLRF   FEA
-04BA:  CLRF   FE9
-04BC:  MOVLW  61
-04BE:  MOVWF  FAF
-04C0:  MOVLW  A6
-04C2:  MOVWF  FAC
-04C4:  MOVLW  90
-04C6:  MOVWF  FAB
-04C8:  MOVLB  1
-04CA:  CLRF   x1F
-04CC:  CLRF   x20
-04CE:  MOVLW  02
-04D0:  MOVWF  x21
-04D2:  BCF    x22.0
-04D4:  BSF    x22.1
-04D6:  BSF    x22.2
-04D8:  BCF    x22.3
-04DA:  BSF    FC1.0
-04DC:  BSF    FC1.1
-04DE:  BSF    FC1.2
-04E0:  BCF    FC1.3
-....................  
-.................... 	int cont; 
-.................... 	int posAray[50]; 
+07F0:  CLRF   FF8
+07F2:  BCF    FD0.7
+07F4:  BSF    07.7
+07F6:  MOVLW  FE
+07F8:  MOVWF  00
+07FA:  MOVLW  06
+07FC:  MOVWF  01
+07FE:  MOVLW  02
+0800:  MOVWF  FE9
+0802:  MOVLW  00
+0804:  MOVWF  FEA
+0806:  CLRF   FEE
+0808:  DECFSZ 00,F
+080A:  BRA    0806
+080C:  DECFSZ 01,F
+080E:  BRA    0806
+0810:  CLRF   FEA
+0812:  CLRF   FE9
+0814:  MOVLW  61
+0816:  MOVWF  FAF
+0818:  MOVLW  A6
+081A:  MOVWF  FAC
+081C:  MOVLW  90
+081E:  MOVWF  FAB
+0820:  CLRF   x9F
+0822:  MOVLW  01
+0824:  MOVWF  xA0
+0826:  MOVLW  0A
+0828:  MOVWF  xA1
+082A:  BCF    xA2.0
+082C:  BSF    xA2.1
+082E:  MOVLW  01
+0830:  MOVWF  xA3
+0832:  CLRF   xA4
+0834:  BSF    xA2.2
+0836:  BCF    xA2.3
+0838:  BCF    xA2.4
+083A:  BSF    FC1.0
+083C:  BSF    FC1.1
+083E:  BSF    FC1.2
+0840:  BCF    FC1.3
 ....................  
 .................... 	clear_interrupt(INT_TIMER2); 
-04E2:  BCF    F9E.1
+0842:  BCF    F9E.1
 .................... 	set_timer2(0); 
-04E4:  CLRF   FCC
+0844:  CLRF   FCC
 .................... 	setup_timer_2(T2_DISABLED, 255, 1); 
-04E6:  MOVLW  00
-04E8:  MOVWF  FCA
-04EA:  MOVLW  FF
-04EC:  MOVWF  FCB
+0846:  MOVLW  00
+0848:  MOVWF  FCA
+084A:  MOVLW  FF
+084C:  MOVWF  FCB
 ....................  
 .................... 	clear_interrupt(INT_RDA); 
 .................... 	enable_interrupts(INT_RDA); 
-04EE:  BSF    F9D.5
+084E:  BSF    F9D.5
 .................... 	enable_interrupts(INT_TIMER2); 
-04F0:  BSF    F9D.1
+0850:  BSF    F9D.1
 .................... 	enable_interrupts(GLOBAL); 
-04F2:  MOVLW  C0
-04F4:  IORWF  FF2,F
+0852:  MOVLW  C0
+0854:  IORWF  FF2,F
 ....................  
 .................... 	while (TRUE) { 
-.................... 		if (recived) { 
-04F6:  BTFSS  x22.0
-04F8:  BRA    055C
-.................... 			recived = FALSE; 
-04FA:  BCF    x22.0
-.................... 			int addr = buffer[0] - 48; 
-04FC:  MOVLW  30
-04FE:  SUBWF  1F,W
-0500:  MOVWF  x56
-.................... 			for (cont = 1; cont < line; ++cont) { 
-0502:  MOVLW  01
-0504:  MOVWF  x23
-0506:  MOVF   x1F,W
-0508:  SUBWF  x23,W
-050A:  BC    0540
-.................... 				posAray[cont - 1] = buffer[cont]; 
-050C:  MOVLW  01
-050E:  SUBWF  x23,W
-0510:  CLRF   03
-0512:  ADDLW  24
-0514:  MOVWF  01
-0516:  MOVLW  01
-0518:  ADDWFC 03,F
-051A:  MOVFF  03,15A
-051E:  CLRF   03
-0520:  MOVF   x23,W
-0522:  ADDLW  1F
-0524:  MOVWF  FE9
-0526:  MOVLW  00
-0528:  ADDWFC 03,W
-052A:  MOVWF  FEA
-052C:  MOVFF  FEF,15B
-0530:  MOVFF  15A,FEA
-0534:  MOVFF  01,FE9
-0538:  MOVFF  15B,FEF
-.................... 			} 
-053C:  INCF   x23,F
-053E:  BRA    0506
-.................... 			long pos = atol(posAray); 
-0540:  MOVLW  01
-0542:  MOVWF  x5A
-0544:  MOVLW  24
-0546:  MOVWF  x59
-0548:  MOVLB  0
-054A:  BRA    016C
-054C:  MOVFF  02,158
-0550:  MOVFF  01,157
-.................... 			buffer[0] = '\0'; 
-0554:  CLRF   1F
-.................... 			line = 0; 
-0556:  MOVLB  1
-0558:  CLRF   x1F
-.................... 			en_timer2 = TRUE; 
-055A:  BSF    x22.1
+.................... 		switch (trata_bto()) { 
+0856:  BRA    0136
+0858:  MOVF   01,W
+085A:  XORLW  08
+085C:  BZ    0868
+085E:  XORLW  01
+0860:  BZ    0872
+0862:  XORLW  09
+0864:  BZ    087C
+0866:  BRA    0882
+.................... 		case bto_sobe: 
+.................... 			send(cmd_subir); 
+0868:  MOVLW  01
+086A:  MOVWF  xC5
+086C:  RCALL  0220
+.................... 			recolhe = TRUE; 
+086E:  BSF    xA2.4
+.................... 			break; 
+0870:  BRA    0882
+.................... 		case bto_desce: 
+.................... 			send(cmd_descer); 
+0872:  MOVLW  02
+0874:  MOVWF  xC5
+0876:  RCALL  0220
+.................... 			recolhe = TRUE; 
+0878:  BSF    xA2.4
+.................... 			break; 
+087A:  BRA    0882
+.................... 		case vbto_parar: 
+.................... 			send(cmd_parar); 
+087C:  CLRF   xC5
+087E:  RCALL  0220
+.................... 			recolhe = FALSE; 
+0880:  BCF    xA2.4
+.................... 			break; 
 .................... 		} 
 ....................  
-.................... 		switch (trata_bto()) { 
-055C:  MOVLB  0
-055E:  BRA    038A
-0560:  MOVF   01,W
-0562:  XORLW  08
-0564:  BZ    056C
-0566:  XORLW  01
-0568:  BZ    058A
-056A:  BRA    05A8
-.................... 		case bto_sobe: 
-.................... 			printf("%u%u", add_slv, cmd_subir); 
-056C:  MOVFF  121,159
-0570:  MOVLW  1B
-0572:  MOVLB  1
-0574:  MOVWF  x5A
-0576:  MOVLB  0
-0578:  RCALL  041A
-057A:  MOVLW  01
-057C:  MOVLB  1
-057E:  MOVWF  x59
-0580:  MOVLW  1B
-0582:  MOVWF  x5A
-0584:  MOVLB  0
-0586:  RCALL  041A
-.................... 			break; 
-0588:  BRA    05C8
-.................... 		case bto_desce: 
-.................... 			printf("%u%u", add_slv, cmd_descer); 
-058A:  MOVFF  121,159
-058E:  MOVLW  1B
-0590:  MOVLB  1
-0592:  MOVWF  x5A
-0594:  MOVLB  0
-0596:  RCALL  041A
-0598:  MOVLW  02
-059A:  MOVLB  1
-059C:  MOVWF  x59
-059E:  MOVLW  1B
-05A0:  MOVWF  x5A
-05A2:  MOVLB  0
-05A4:  RCALL  041A
-.................... 			break; 
-05A6:  BRA    05C8
-.................... 		default: 
-.................... 			if (send_stp) { 
-05A8:  MOVLB  1
-05AA:  BTFSS  x22.2
-05AC:  BRA    05CA
-.................... 				send_stp = FALSE; 
-05AE:  BCF    x22.2
-.................... 				printf("%u%u", add_slv, cmd_parar); 
-05B0:  MOVFF  121,159
-05B4:  MOVLW  1B
-05B6:  MOVWF  x5A
-05B8:  MOVLB  0
-05BA:  RCALL  041A
-05BC:  MOVLB  1
-05BE:  CLRF   x59
-05C0:  MOVLW  1B
-05C2:  MOVWF  x5A
-05C4:  MOVLB  0
-05C6:  RCALL  041A
-05C8:  MOVLB  1
-.................... 			} 
+.................... 		if (recolhe) { 
+0882:  BTFSS  xA2.4
+0884:  BRA    0888
+.................... 			read(); 
+0886:  BRA    076C
 .................... 		} 
+....................  
 .................... 		delay_ms(100); 
-05CA:  MOVLW  64
-05CC:  MOVWF  x5B
-05CE:  MOVLB  0
-05D0:  RCALL  0360
+0888:  MOVLW  64
+088A:  MOVWF  xC7
+088C:  RCALL  010E
 .................... 	} 
-05D2:  MOVLB  1
-05D4:  BRA    04F6
+088E:  BRA    0856
 ....................  
 .................... 	return 0; 
-05D6:  MOVLW  00
-05D8:  MOVWF  01
+0890:  MOVLW  00
+0892:  MOVWF  01
 .................... } 
-05DA:  SLEEP 
+0894:  SLEEP 
 
 Configuration Fuses:
    Word  1: 2200   HS NOOSCSEN

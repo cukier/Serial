@@ -5,66 +5,23 @@
  *      Author: cuki
  */
 
-/*
- * master.c
- *
- *  Created on: 18/08/2014
- *      Author: cuki
- */
-
 #include<18F252.h>
 #zero_ram
+
+#include<stdlib.h>
 
 #fuses HS
 #use delay(clock=15MHz)
 #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7)
 
-//defines
-#define buffer_size 256
-//cmd
-#define cmd_parar	0x00
-#define cmd_subir	0x01
-#define cmd_descer	0x02
-//entradas
-#define bto_sobe	PIN_B0
-#define bto_desce	PIN_B1
-//saidas
-#define saida_sobe	PIN_C0
-#define saida_desce	PIN_C1
-//tempos
-#define debounce 100
-
-int buffer[buffer_size];
-int line = 0;
-int lido = 0;
-int m_addr = 1;
-
-short recived = FALSE;
-short en_timer2 = TRUE;
-
-#INT_RDA
-void serial_isr() {
-	clear_interrupt(INT_RDA);
-	buffer[line++] = getc();
-	buffer[line] = '\0';
-	set_timer2(0);
-	if (en_timer2) {
-		en_timer2 = FALSE;
-		setup_timer_2(T2_DIV_BY_16, 255, 1);
-	}
-}
-
-#INT_TIMER2
-void timer2_isr() {
-	clear_interrupt(INT_TIMER2);
-	setup_timer_2(T2_DISABLED, 255, 1);
-	set_timer2(0);
-	recived = TRUE;
-}
+#include "definicoes.c"
+#include "variaveis.c"
+#include "interrupcoes.c"
+#include "funcoes.c"
 
 int main(void) {
 
-	int addr;
+	int r_addr;
 	int cmd;
 
 	clear_interrupt(INT_TIMER2);
@@ -85,13 +42,13 @@ int main(void) {
 	while (TRUE) {
 		if (recived) {
 			recived = FALSE;
-			addr = buffer[0] - 48;
-			cmd = buffer[1] - 48;
+			r_addr = trans_addr(buffer);
+			cmd = trans_cmd(buffer);
 			buffer[0] = '\0';
 			line = 0;
 			en_timer2 = TRUE;
 
-			if (m_addr == addr) {
+			if (r_addr == addr || r_addr == 0) {
 				if (cmd == cmd_subir)
 					output_high(saida_sobe);
 				else if (cmd == cmd_descer)
@@ -100,7 +57,8 @@ int main(void) {
 					output_low(saida_sobe);
 					output_low(saida_desce);
 				}
-				printf("%u%lu", m_addr, get_timer0());
+				if (r_addr != 0)
+					printf("\n\r%02u%04lu", addr, get_timer0());
 			}
 		}
 	}
