@@ -14,6 +14,7 @@
 #define cmd_subir	0x01
 #define cmd_descer	0x02
 #define cmd_pos		0x03
+#define cmd_ref		0x04
 //entradas
 #define bto_sobe	PIN_B0
 #define bto_desce	PIN_B1

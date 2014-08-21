@@ -45,20 +45,25 @@ int trata_bto() {
 	return ret;
 }
 
-void send(int iCmd) {
-	int i = 0;
-	if (iCmd != cmd_parar) {
-		for (i = 1; i <= nrSlaves; ++i)
-			printf("\n\r%02u%02u", i, iCmd);
-	} else
-		printf("\n\r%02u%02u", 0, iCmd);
+void send(int iaddr, int iCmd) {
+	printf("\n\r%02u%02u", iaddr, iCmd);
+	delay_ms(10);
+}
+
+void sendAll(int iCmd) {
+	send(0, iCmd);
+}
+
+void sendRef() {
+	printf("\n\r%02u%02u%04lu", 0, cmd_ref, posRef);
+	delay_ms(10);
 }
 
 void read() {
 	int i = 0;
 
 	for (i = 1; i <= nrSlaves; ++i) {
-		printf("\n\r%02u%02u", i, cmd_pos);
+		send(i, cmd_pos);
 
 		while (!recived)
 			;
@@ -87,21 +92,22 @@ int main(void) {
 	while (TRUE) {
 		switch (trata_bto()) {
 		case bto_sobe:
-			send(cmd_subir);
+			sendAll(cmd_subir);
 			recolhe = TRUE;
 			break;
 		case bto_desce:
-			send(cmd_descer);
+			sendAll(cmd_descer);
 			recolhe = TRUE;
 			break;
 		case vbto_parar:
-			send(cmd_parar);
+			sendAll(cmd_parar);
 			recolhe = FALSE;
 			break;
 		}
 
 		if (recolhe) {
 			read();
+			sendRef();
 		}
 
 		delay_ms(100);

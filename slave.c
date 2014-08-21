@@ -21,9 +21,6 @@
 
 int main(void) {
 
-	int r_addr;
-	int cmd;
-
 	clear_interrupt(INT_TIMER2);
 	set_timer2(0);
 	setup_timer_2(T2_DISABLED, 255, 1);
@@ -39,25 +36,28 @@ int main(void) {
 	output_low(saida_sobe);
 	output_low(saida_desce);
 
+	addr = 1;
+
 	while (TRUE) {
 		if (recived) {
 			recived = FALSE;
+			r_addr = 0;
 			r_addr = trans_addr(buffer);
-			cmd = trans_cmd(buffer);
+			r_cmd = trans_cmd(buffer);
 			buffer[0] = '\0';
 			line = 0;
 			en_timer2 = TRUE;
 
-			if (r_addr == addr || r_addr == 0) {
-				if (cmd == cmd_subir)
+			if (r_addr == addr || !r_addr) {
+				if (r_cmd == cmd_subir)
 					output_high(saida_sobe);
-				else if (cmd == cmd_descer)
+				else if (r_cmd == cmd_descer)
 					output_high(saida_desce);
-				else if (cmd == cmd_parar) {
+				else if (r_cmd == cmd_parar) {
 					output_low(saida_sobe);
 					output_low(saida_desce);
 				}
-				if (r_addr != 0)
+				if (r_addr)
 					printf("\n\r%02u%04lu", addr, get_timer0());
 			}
 		}
