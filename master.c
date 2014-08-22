@@ -27,30 +27,19 @@ int r_cmd = 0xFF;
 int buffer[buffer_size];
 
 long pos_r;
-long pos_slv[nrMax];
+long *pos_slv;
 
 #include "funcoes.c"
 
 int main(void) {
 
 	while (TRUE) {
-//		m_cmd = trata_bto();
-//		if (m_cmd == cmd_subir || m_cmd == cmd_descer) {
-//			delay_ms(20);
-//			for (i = 1; i <= nrSlv; ++i) {
-//				printf("%02u%02u\r\n", i, cmd_r);
-//				gets(buffer);
-//				pos_r = getPos(buffer);
-//				pos_slv[i] = pos_r;
-//			}
-//		}
-		send_cmd(0, cmd_w);
-		send_pos(0, 12345);
-		send_cmd(1, cmd_r);
-		gets(buffer);
-		r_addr = getAddr(buffer);
-		pos_slv[0] = getPos(buffer);
 
+		m_cmd = trata_bto();
+
+		if (m_cmd == cmd_subir || m_cmd == cmd_descer) {
+			pos_slv = recall_pos(nrSlv, pos_r);
+		}
 		delay_ms(100);
 	}
 

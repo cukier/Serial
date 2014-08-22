@@ -4,13 +4,6 @@
  *  Created on: 21/08/2014
  *      Author: cuki
  */
-
-int send_cmd(int cmd) {
-	printf("%02u%02u\r\n", 0, cmd);
-	delay_ms(100);
-	return cmd;
-}
-
 int getAddr(int *str) {
 
 	int *p;
@@ -54,6 +47,17 @@ long getPos(int *str) {
 
 }
 
+int send_cmd(int addr, int cmd) {
+	delay_ms(latencia);
+	printf("%02u%02u\n\r", addr, cmd);
+	return cmd;
+}
+
+void send_pos(int addr, long pos) {
+	delay_ms(latencia);
+	printf("%02u%05lu\n\r", addr, pos);
+}
+
 int trata_bto() {
 	short sobe = !input(bto_sobe);
 	short desce = !input(bto_desce);
@@ -63,25 +67,34 @@ int trata_bto() {
 		if (!ctrl_bto) {
 			delay_ms(debounce);
 			if (!input(bto_sobe))
-				ret = send_cmd(cmd_subir);
+				ret = send_cmd(allSlvs, cmd_subir);
 			if (!input(bto_desce))
-				ret = send_cmd(cmd_descer);
+				ret = send_cmd(allSlvs, cmd_descer);
 			ctrl_bto = TRUE;
 		}
 	} else if (ctrl_bto) {
 		ctrl_bto = FALSE;
-		ret = send_cmd(cmd_parar);
+		ret = send_cmd(allSlvs, cmd_parar);
 	}
 
 	return ret;
 }
 
-void send_cmd(int addr, int cmd) {
-	printf("%02u%02u\n\r", addr, cmd);
-	delay_ms(20);
-}
+long *recall_pos(int nrSlaves, long pos) {
+	int i;
+	static long ret[nrMax];
+	int aux[nrMax];
 
-void send_pos(int addr, long pos) {
-	printf("%02u%05lu\n\r", addr, pos);
-	delay_ms(20);
+	delay_ms(latencia);
+	send_cmd(allSlvs, cmd_w);
+	send_cmd(allSlvs, pos);
+
+	for (i = 0; i < nrSlaves; ++i) {
+		delay_ms(latencia);
+		send_cmd(i, cmd_r);
+		gets(aux);
+		ret[i] = getPos(aux);
+	}
+
+	return ret;
 }

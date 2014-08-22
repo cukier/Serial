@@ -15,5 +15,8 @@
 #define bto_desce	PIN_B1
 
 #define debounce 	100
+#define latencia	20
+
 #define nrMax		16
 #define buffer_size	16
+#define allSlvs		0
