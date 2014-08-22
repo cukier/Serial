@@ -1,57 +1,87 @@
 /*
- * fucoes.c
+ * funcoes.c
  *
- *  Created on: 20/08/2014
+ *  Created on: 21/08/2014
  *      Author: cuki
  */
 
-int trans_addr(int *ptr) {
-	int ret = 0xFF;
-	int aux[2];
+int send_cmd(int cmd) {
+	printf("%02u%02u\r\n", 0, cmd);
+	delay_ms(100);
+	return cmd;
+}
+
+int getAddr(int *str) {
+
 	int *p;
+	int aux[2];
 
-	for (p = ptr; *p != '\r'; p++)
-		;
+	p = str;
 
-	aux[0] = *(p + 2);
+	aux[0] = *p;
 	aux[1] = *(p + 1);
 
-	ret = atoi(aux);
-
-	return ret;
+	return atoi(aux);
 }
 
-long trans_pos(int *ptr) {
+int getCmd(int *str) {
 
-	int ret = 0xFF;
-	int aux[4];
 	int *p;
-
-	for (p = ptr; *p != '\r'; p++)
-		;
-
-	aux[0] = *(p + 6);
-	aux[1] = *(p + 5);
-	aux[2] = *(p + 4);
-	aux[3] = *(p + 3);
-
-	ret = atol(aux);
-
-	return ret;
-}
-
-int trans_cmd(int *ptr) {
-	int ret = 0xFF;
 	int aux[2];
-	int *p;
 
-	for (p = ptr; *p != '\r'; p++)
-		;
+	p = str;
 
-	aux[0] = *(p + 4);
+	aux[0] = *(p + 2);
 	aux[1] = *(p + 3);
 
-	ret = atoi(aux);
+	return atoi(aux);
+}
+
+long getPos(int *str) {
+
+	int *p;
+	int aux[5];
+
+	p = str;
+
+	aux[0] = *(p + 2);
+	aux[1] = *(p + 3);
+	aux[2] = *(p + 4);
+	aux[3] = *(p + 5);
+	aux[4] = *(p + 6);
+
+	return atol(aux);
+
+}
+
+int trata_bto() {
+	short sobe = !input(bto_sobe);
+	short desce = !input(bto_desce);
+	int ret = 0xFF;
+
+	if (sobe ^ desce) {
+		if (!ctrl_bto) {
+			delay_ms(debounce);
+			if (!input(bto_sobe))
+				ret = send_cmd(cmd_subir);
+			if (!input(bto_desce))
+				ret = send_cmd(cmd_descer);
+			ctrl_bto = TRUE;
+		}
+	} else if (ctrl_bto) {
+		ctrl_bto = FALSE;
+		ret = send_cmd(cmd_parar);
+	}
 
 	return ret;
+}
+
+void send_cmd(int addr, int cmd) {
+	printf("%02u%02u\n\r", addr, cmd);
+	delay_ms(20);
+}
+
+void send_pos(int addr, long pos) {
+	printf("%02u%05lu\n\r", addr, pos);
+	delay_ms(20);
 }
