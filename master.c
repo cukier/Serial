@@ -19,7 +19,7 @@
 short ctrl_bto;
 
 int m_cmd;
-int nrSlv = 1;
+int nrSlv = 2;
 int i;
 int r_addr = 0xFF;
 int r_cmd = 0xFF;
@@ -35,7 +35,7 @@ int main(void) {
 
 	while (TRUE) {
 
-		m_cmd = trata_bto();
+		m_cmd = trata_bto(m_cmd);
 
 		if (m_cmd == cmd_subir || m_cmd == cmd_descer) {
 			pos_slv = recall_pos(nrSlv, pos_r);

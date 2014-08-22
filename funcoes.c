@@ -58,10 +58,10 @@ void send_pos(int addr, long pos) {
 	printf("%02u%05lu\n\r", addr, pos);
 }
 
-int trata_bto() {
+int trata_bto(int cmd) {
 	short sobe = !input(bto_sobe);
 	short desce = !input(bto_desce);
-	int ret = 0xFF;
+	int ret = cmd;
 
 	if (sobe ^ desce) {
 		if (!ctrl_bto) {
@@ -89,7 +89,7 @@ long *recall_pos(int nrSlaves, long pos) {
 	send_cmd(allSlvs, cmd_w);
 	send_cmd(allSlvs, pos);
 
-	for (i = 0; i < nrSlaves; ++i) {
+	for (i = 1; i <= nrSlaves; ++i) {
 		delay_ms(latencia);
 		send_cmd(i, cmd_r);
 		gets(aux);

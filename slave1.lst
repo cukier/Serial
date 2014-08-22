@@ -1,6 +1,6 @@
 CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 
-               Filename:   D:\Projetos\Serial\slave.lst
+               Filename:   D:\Projetos\Serial\slave1.lst
 
                ROM used:   1938 bytes (6%)
                            Largest free fragment is 30830
@@ -2673,8 +2673,8 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 06F2:  BSF    FC1.2
 06F4:  BCF    FC1.3
 ....................  
-.................... 	m_addr = 1; 
-06F6:  MOVLW  01
+.................... 	m_addr = 2; 
+06F6:  MOVLW  02
 06F8:  MOVWF  0B
 ....................  
 .................... 	while (TRUE) { 
