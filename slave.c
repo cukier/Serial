@@ -15,18 +15,7 @@
 #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7)
 
 #include "defines.c"
-
-short ctrl_bto;
-
-int m_addr = 0xFF;
-int r_addr = 0xFF;
-int r_cmd = 0xFF;
-
-long r_pos = 12345;
-long m_pos = 12345;
-
-int buffer[arrayLen];
-
+#include "variaveis.c"
 #include "funcoes.c"
 
 void trata_comunicacao() {

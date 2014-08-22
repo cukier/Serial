@@ -15,21 +15,7 @@
 #use rs232(baud=9600,xmit=pin_c6,rcv=pin_c7)
 
 #include "defines.c"
-
-short ctrl_bto;
-
-int m_cmd;
-int nrSlv = 2;
-int i;
-int r_addr = 0xFF;
-int r_cmd = 0xFF;
-
-int buffer[arrayLen];
-
-long pos_r = 54321;
-long *p;
-long pos_slv[arrayLen];
-
+#include "variaveis.c"
 #include "funcoes.c"
 
 int main(void) {
@@ -39,7 +25,7 @@ int main(void) {
 		m_cmd = trata_bto(m_cmd);
 
 		if (m_cmd == cmd_subir || m_cmd == cmd_descer) {
-			p = recall_pos(nrSlv, pos_r);
+			p = recall_pos(nrSlv, r_pos);
 			for (i = 0; i < nrSlv; ++i) {
 				pos_slv[i] = *(p + i);
 			}
