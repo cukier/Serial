@@ -89,7 +89,6 @@ long *recall_pos(int nrSlaves, long pos) {
 	send_pos(allSlvs, pos);
 
 	for (i = 1; i <= nrSlaves; ++i) {
-		delay_ms(latencia);
 		send_cmd(i, cmd_r);
 		gets(aux);
 		ret[i - 1] = getPos(aux);
