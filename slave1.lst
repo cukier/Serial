@@ -1,4 +1,4 @@
-CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 15:55
+CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 16:18
 
                Filename:   D:\Projetos\Serial\slave1.lst
 
@@ -2640,7 +2640,6 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 15:55
 .................... 	send_pos(allSlvs, pos); 
 ....................  
 .................... 	for (i = 1; i <= nrSlaves; ++i) { 
-.................... 		delay_ms(latencia); 
 .................... 		send_cmd(i, cmd_r); 
 .................... 		gets(aux); 
 .................... 		ret[i - 1] = getPos(aux); 

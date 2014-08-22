@@ -1,5 +1,5 @@
 CC=ccsc
-CFLAGS=+FH +LN -T -A -M -Z +DF +Y=9 +E
+CFLAGS=+FH +LN -T -A -M -Z +DF +Y=9 +STDOUT
 
 all: master slave slave1
 
