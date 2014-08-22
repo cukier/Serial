@@ -1,15 +1,15 @@
-CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
+CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 15:44
 
                Filename:   D:\Projetos\Serial\slave.lst
 
-               ROM used:   1938 bytes (6%)
-                           Largest free fragment is 30830
-               RAM used:   67 (4%) at main() level
+               ROM used:   1952 bytes (6%)
+                           Largest free fragment is 30816
+               RAM used:   66 (4%) at main() level
                            89 (6%) worst case
-               Stack:     3 locations
+               Stack:     4 locations
 
 *
-0000:  GOTO   06AE
+0000:  GOTO   0746
 .................... /* 
 ....................  * slave.c 
 ....................  * 
@@ -2401,8 +2401,8 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 .................... #define debounce 	100 
 .................... #define latencia	20 
 ....................  
-.................... #define nrMax		16 
-.................... #define buffer_size	16 
+.................... #define arrayLen		16 
+.................... #define bufferLen	16 
 .................... #define allSlvs		0 
 ....................  
 ....................  
@@ -2412,10 +2412,10 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 .................... int r_addr = 0xFF; 
 .................... int r_cmd = 0xFF; 
 ....................  
-.................... long r_pos = 0xFFFF; 
+.................... long r_pos = 12345; 
 .................... long m_pos = 12345; 
 ....................  
-.................... int buffer[buffer_size]; 
+.................... int buffer[arrayLen]; 
 ....................  
 .................... #include "funcoes.c" 
 .................... /* 
@@ -2455,7 +2455,7 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 0218:  RCALL  0050
 021A:  MOVF   01,W
 .................... } 
-021C:  GOTO   071E (RETURN)
+021C:  GOTO   06D2 (RETURN)
 ....................  
 .................... int getCmd(int *str) { 
 ....................  
@@ -2492,7 +2492,7 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 0256:  RCALL  0050
 0258:  MOVF   01,W
 .................... } 
-025A:  GOTO   072A (RETURN)
+025A:  GOTO   06DE (RETURN)
 ....................  
 .................... long getPos(int *str) { 
 ....................  
@@ -2558,7 +2558,7 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 0510:  MOVF   02,W
 ....................  
 .................... } 
-0512:  GOTO   0770 (RETURN)
+0512:  GOTO   0724 (RETURN)
 ....................  
 .................... int send_cmd(int addr, int cmd) { 
 .................... 	delay_ms(latencia); 
@@ -2591,7 +2591,7 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 06A6:  BRA    06A4
 06A8:  MOVWF  FAD
 .................... } 
-06AA:  GOTO   078E (RETURN)
+06AA:  GOTO   0742 (RETURN)
 ....................  
 .................... int trata_bto(int cmd) { 
 .................... 	short sobe = !input(bto_sobe); 
@@ -2617,150 +2617,161 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 ....................  
 .................... long *recall_pos(int nrSlaves, long pos) { 
 .................... 	int i; 
-.................... 	static long ret[nrMax]; 
-.................... 	int aux[nrMax]; 
+.................... 	static long ret[arrayLen]; 
+.................... 	int aux[arrayLen]; 
 ....................  
-.................... 	delay_ms(latencia); 
 .................... 	send_cmd(allSlvs, cmd_w); 
-.................... 	send_cmd(allSlvs, pos); 
+.................... 	send_pos(allSlvs, pos); 
 ....................  
 .................... 	for (i = 1; i <= nrSlaves; ++i) { 
 .................... 		delay_ms(latencia); 
 .................... 		send_cmd(i, cmd_r); 
 .................... 		gets(aux); 
-.................... 		ret[i] = getPos(aux); 
+.................... 		ret[i - 1] = getPos(aux); 
 .................... 	} 
 ....................  
 .................... 	return ret; 
 .................... } 
 ....................  
 ....................  
-.................... int main(void) { 
-06AE:  CLRF   FF8
-06B0:  BCF    FD0.7
-06B2:  MOVLW  FE
-06B4:  MOVWF  00
-06B6:  MOVLW  06
-06B8:  MOVWF  01
-06BA:  MOVLW  02
-06BC:  MOVWF  FE9
-06BE:  MOVLW  00
-06C0:  MOVWF  FEA
-06C2:  CLRF   FEE
-06C4:  DECFSZ 00,F
-06C6:  BRA    06C2
-06C8:  DECFSZ 01,F
-06CA:  BRA    06C2
-06CC:  CLRF   FEA
-06CE:  CLRF   FE9
-06D0:  MOVLW  61
-06D2:  MOVWF  FAF
-06D4:  MOVLW  A6
-06D6:  MOVWF  FAC
-06D8:  MOVLW  90
-06DA:  MOVWF  FAB
-06DC:  SETF   0B
-06DE:  SETF   0C
-06E0:  SETF   0D
-06E2:  SETF   0F
-06E4:  SETF   0E
-06E6:  MOVLW  30
-06E8:  MOVWF  11
-06EA:  MOVLW  39
-06EC:  MOVWF  10
-06EE:  BSF    FC1.0
-06F0:  BSF    FC1.1
-06F2:  BSF    FC1.2
-06F4:  BCF    FC1.3
+.................... void trata_comunicacao() { 
 ....................  
-.................... 	m_addr = 1; 
-06F6:  MOVLW  01
-06F8:  MOVWF  0B
+.................... 	gets(buffer); 
+06AE:  CLRF   FEA
+06B0:  MOVLW  12
+06B2:  MOVWF  FE9
+06B4:  DECF   FE9,F
+06B6:  BTFSS  F9E.5
+06B8:  BRA    06B6
+06BA:  MOVFF  FAE,FEC
+06BE:  MOVLW  0D
+06C0:  SUBWF  FEF,W
+06C2:  BNZ   06B6
+06C4:  CLRF   FEC
+.................... 	r_addr = 0xFF; 
+06C6:  SETF   0C
+.................... 	r_cmd = 0xFF; 
+06C8:  SETF   0D
+.................... 	r_addr = getAddr(buffer); 
+06CA:  CLRF   43
+06CC:  MOVLW  12
+06CE:  MOVWF  42
+06D0:  BRA    01EA
+06D2:  MOVFF  01,0C
+.................... 	r_cmd = getCmd(buffer); 
+06D6:  CLRF   43
+06D8:  MOVLW  12
+06DA:  MOVWF  42
+06DC:  BRA    0220
+06DE:  MOVFF  01,0D
 ....................  
-.................... 	while (TRUE) { 
-.................... 		gets(buffer); 
-06FA:  CLRF   FEA
-06FC:  MOVLW  12
-06FE:  MOVWF  FE9
-0700:  DECF   FE9,F
-0702:  BTFSS  F9E.5
-0704:  BRA    0702
-0706:  MOVFF  FAE,FEC
-070A:  MOVLW  0D
-070C:  SUBWF  FEF,W
-070E:  BNZ   0702
-0710:  CLRF   FEC
-.................... 		r_addr = 0xFF; 
-0712:  SETF   0C
-.................... 		r_cmd = 0xFF; 
-0714:  SETF   0D
-.................... 		r_addr = getAddr(buffer); 
-0716:  CLRF   43
-0718:  MOVLW  12
-071A:  MOVWF  42
-071C:  BRA    01EA
-071E:  MOVFF  01,0C
-.................... 		r_cmd = getCmd(buffer); 
-0722:  CLRF   43
-0724:  MOVLW  12
-0726:  MOVWF  42
-0728:  BRA    0220
-072A:  MOVFF  01,0D
-....................  
-.................... 		if (r_addr == m_addr | !r_addr) { 
-072E:  MOVF   0B,W
-0730:  SUBWF  0C,W
-0732:  BZ    0738
-0734:  MOVLW  00
-0736:  BRA    073A
-0738:  MOVLW  01
-073A:  MOVWF  42
-073C:  MOVF   0C,F
-073E:  BZ    0744
-0740:  MOVLW  00
-0742:  BRA    0746
-0744:  MOVLW  01
-0746:  IORWF  42,W
-0748:  BZ    078E
-.................... 			if (r_cmd == cmd_w) { 
-074A:  MOVF   0D,W
-074C:  SUBLW  05
-074E:  BNZ   077A
-.................... 				gets(buffer); 
-0750:  CLRF   FEA
-0752:  MOVLW  12
-0754:  MOVWF  FE9
-0756:  DECF   FE9,F
-0758:  BTFSS  F9E.5
-075A:  BRA    0758
-075C:  MOVFF  FAE,FEC
-0760:  MOVLW  0D
-0762:  SUBWF  FEF,W
-0764:  BNZ   0758
-0766:  CLRF   FEC
-.................... 				r_pos = getPos(buffer); 
-0768:  CLRF   43
-076A:  MOVLW  12
-076C:  MOVWF  42
-076E:  BRA    049C
-0770:  MOVFF  02,0F
-0774:  MOVFF  01,0E
-.................... 			} else if (r_cmd == cmd_r) { 
-0778:  BRA    078E
-077A:  MOVF   0D,W
-077C:  SUBLW  04
-077E:  BNZ   078E
-.................... 				send_pos(m_addr, r_pos); 
-0780:  MOVFF  0B,42
-0784:  MOVFF  0F,44
-0788:  MOVFF  0E,43
-078C:  BRA    067C
-.................... 			} 
+.................... 	if (r_addr == m_addr | !r_addr) { 
+06E2:  MOVF   0B,W
+06E4:  SUBWF  0C,W
+06E6:  BZ    06EC
+06E8:  MOVLW  00
+06EA:  BRA    06EE
+06EC:  MOVLW  01
+06EE:  MOVWF  42
+06F0:  MOVF   0C,F
+06F2:  BZ    06F8
+06F4:  MOVLW  00
+06F6:  BRA    06FA
+06F8:  MOVLW  01
+06FA:  IORWF  42,W
+06FC:  BZ    0742
+.................... 		if (r_cmd == cmd_w) { 
+06FE:  MOVF   0D,W
+0700:  SUBLW  05
+0702:  BNZ   072E
+.................... 			gets(buffer); 
+0704:  CLRF   FEA
+0706:  MOVLW  12
+0708:  MOVWF  FE9
+070A:  DECF   FE9,F
+070C:  BTFSS  F9E.5
+070E:  BRA    070C
+0710:  MOVFF  FAE,FEC
+0714:  MOVLW  0D
+0716:  SUBWF  FEF,W
+0718:  BNZ   070C
+071A:  CLRF   FEC
+.................... 			r_pos = getPos(buffer); 
+071C:  CLRF   43
+071E:  MOVLW  12
+0720:  MOVWF  42
+0722:  BRA    049C
+0724:  MOVFF  02,0F
+0728:  MOVFF  01,0E
+.................... 		} else if (r_cmd == cmd_r) { 
+072C:  BRA    0742
+072E:  MOVF   0D,W
+0730:  SUBLW  04
+0732:  BNZ   0742
+.................... 			send_pos(m_addr, r_pos); 
+0734:  MOVFF  0B,42
+0738:  MOVFF  0F,44
+073C:  MOVFF  0E,43
+0740:  BRA    067C
 .................... 		} 
 .................... 	} 
-078E:  BRA    06FA
 .................... } 
-0790:  SLEEP 
+0742:  GOTO   0798 (RETURN)
+....................  
+.................... int main(void) { 
+0746:  CLRF   FF8
+0748:  BCF    FD0.7
+074A:  MOVLW  FE
+074C:  MOVWF  00
+074E:  MOVLW  06
+0750:  MOVWF  01
+0752:  MOVLW  02
+0754:  MOVWF  FE9
+0756:  MOVLW  00
+0758:  MOVWF  FEA
+075A:  CLRF   FEE
+075C:  DECFSZ 00,F
+075E:  BRA    075A
+0760:  DECFSZ 01,F
+0762:  BRA    075A
+0764:  CLRF   FEA
+0766:  CLRF   FE9
+0768:  MOVLW  61
+076A:  MOVWF  FAF
+076C:  MOVLW  A6
+076E:  MOVWF  FAC
+0770:  MOVLW  90
+0772:  MOVWF  FAB
+0774:  SETF   0B
+0776:  SETF   0C
+0778:  SETF   0D
+077A:  MOVLW  30
+077C:  MOVWF  0F
+077E:  MOVLW  39
+0780:  MOVWF  0E
+0782:  MOVLW  30
+0784:  MOVWF  11
+0786:  MOVLW  39
+0788:  MOVWF  10
+078A:  BSF    FC1.0
+078C:  BSF    FC1.1
+078E:  BSF    FC1.2
+0790:  BCF    FC1.3
+....................  
+.................... 	m_addr = 1; 
+0792:  MOVLW  01
+0794:  MOVWF  0B
+....................  
+.................... 	while (TRUE) { 
+.................... 		trata_comunicacao(); 
+0796:  BRA    06AE
+.................... 	} 
+0798:  BRA    0796
+.................... 	return 0; 
+079A:  MOVLW  00
+079C:  MOVWF  01
+.................... } 
+079E:  SLEEP 
 
 Configuration Fuses:
    Word  1: 2200   HS NOOSCSEN

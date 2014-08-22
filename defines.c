@@ -17,6 +17,6 @@
 #define debounce 	100
 #define latencia	20
 
-#define nrMax		16
-#define buffer_size	16
+#define arrayLen		16
+#define bufferLen	16
 #define allSlvs		0

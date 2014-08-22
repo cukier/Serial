@@ -25,7 +25,7 @@ int r_cmd = 0xFF;
 long r_pos = 0xFFFF;
 long m_pos = 12345;
 
-int buffer[buffer_size];
+int buffer[arrayLen];
 
 #include "funcoes.c"
 

@@ -1,4 +1,4 @@
-CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
+CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 15:44
 
                Filename:   D:\Projetos\Serial\slave1.lst
 
@@ -2401,8 +2401,8 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 .................... #define debounce 	100 
 .................... #define latencia	20 
 ....................  
-.................... #define nrMax		16 
-.................... #define buffer_size	16 
+.................... #define arrayLen		16 
+.................... #define bufferLen	16 
 .................... #define allSlvs		0 
 ....................  
 ....................  
@@ -2415,7 +2415,7 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 .................... long r_pos = 0xFFFF; 
 .................... long m_pos = 12345; 
 ....................  
-.................... int buffer[buffer_size]; 
+.................... int buffer[arrayLen]; 
 ....................  
 .................... #include "funcoes.c" 
 .................... /* 
@@ -2617,18 +2617,17 @@ CCS PCH C Compiler, Version 4.140, 22098               22-ago-14 14:52
 ....................  
 .................... long *recall_pos(int nrSlaves, long pos) { 
 .................... 	int i; 
-.................... 	static long ret[nrMax]; 
-.................... 	int aux[nrMax]; 
+.................... 	static long ret[arrayLen]; 
+.................... 	int aux[arrayLen]; 
 ....................  
-.................... 	delay_ms(latencia); 
 .................... 	send_cmd(allSlvs, cmd_w); 
-.................... 	send_cmd(allSlvs, pos); 
+.................... 	send_pos(allSlvs, pos); 
 ....................  
 .................... 	for (i = 1; i <= nrSlaves; ++i) { 
 .................... 		delay_ms(latencia); 
 .................... 		send_cmd(i, cmd_r); 
 .................... 		gets(aux); 
-.................... 		ret[i] = getPos(aux); 
+.................... 		ret[i - 1] = getPos(aux); 
 .................... 	} 
 ....................  
 .................... 	return ret; 

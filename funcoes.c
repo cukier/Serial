@@ -82,18 +82,17 @@ int trata_bto(int cmd) {
 
 long *recall_pos(int nrSlaves, long pos) {
 	int i;
-	static long ret[nrMax];
-	int aux[nrMax];
+	static long ret[arrayLen];
+	int aux[arrayLen];
 
-	delay_ms(latencia);
 	send_cmd(allSlvs, cmd_w);
-	send_cmd(allSlvs, pos);
+	send_pos(allSlvs, pos);
 
 	for (i = 1; i <= nrSlaves; ++i) {
 		delay_ms(latencia);
 		send_cmd(i, cmd_r);
 		gets(aux);
-		ret[i] = getPos(aux);
+		ret[i - 1] = getPos(aux);
 	}
 
 	return ret;
