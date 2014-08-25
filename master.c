@@ -20,6 +20,8 @@
 
 int main(void) {
 
+	m_cmd = cmd_parar;
+
 	while (TRUE) {
 
 		m_cmd = trata_bto(m_cmd);
