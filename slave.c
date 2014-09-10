@@ -24,9 +24,12 @@ int main(void) {
 	init_slv();
 
 	while (TRUE) {
+
 		if (RxOk) {
 			RxOk = FALSE;
+			trata_comunicacao();
 		}
+
 	}
 
 	return 0;

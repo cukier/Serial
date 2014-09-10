@@ -105,7 +105,8 @@ int trata_comunicacao() {
 
 	if (r_addr == m_addr || !r_addr) {
 		if (r_cmd == cmd_w) {
-			gets(buffer);
+			while (!RxOk)
+				;
 			r_pos = getPos(buffer);
 		} else if (r_cmd == cmd_r) {
 			m_pos++;
@@ -169,7 +170,6 @@ void init_slv() {
 }
 
 void trata_cmd(int cmd) {
-
 	switch (cmd) {
 	case cmd_subir:
 		subir();

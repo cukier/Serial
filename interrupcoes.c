@@ -11,8 +11,6 @@ void isr_rda() {
 	buffer[line++] = getc();
 	buffer[line] = "\0";
 	RxOk = recivedOk(buffer);
-	if (RxOk) {
-		RxOk = FALSE;
+	if (RxOk && line)
 		line = 0;
-	}
 }
