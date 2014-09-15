@@ -59,15 +59,17 @@ void send_pos(int addr, long pos) {
 long *recall_pos(int nrSlaves, long pos) {
 	int i;
 	static long ret[bufferLen];
-	int aux[bufferLen];
 
 	send_cmd(allSlvs, cmd_w);
 	send_pos(allSlvs, pos);
 
 	for (i = 1; i <= nrSlaves; ++i) {
 		send_cmd(i, cmd_r);
-		gets(aux);
-		ret[i - 1] = getPos(aux);
+		delay_ms(latencia * 2);
+		while (!RxOk)
+			;
+		RxOk = FALSE;
+		ret[i - 1] = getPos(buffer);
 	}
 
 	return ret;
@@ -107,6 +109,7 @@ int trata_comunicacao() {
 		if (r_cmd == cmd_w) {
 			while (!RxOk)
 				;
+			RxOk = FALSE;
 			r_pos = getPos(buffer);
 		} else if (r_cmd == cmd_r) {
 			m_pos++;
@@ -153,6 +156,8 @@ void init_mstr() {
 	nrSlv = getMAddr();
 
 	parar();
+
+	printf("Inicio Mestre:\n\r%d escravos\n\r", nrSlv);
 }
 
 void init_slv() {
@@ -167,6 +172,8 @@ void init_slv() {
 	m_addr = getMAddr();
 
 	parar();
+
+	printf("Inicio Escravo:\n\rEndereco: %d\n\r", m_addr);
 }
 
 void trata_cmd(int cmd) {
