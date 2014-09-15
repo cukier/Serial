@@ -89,8 +89,6 @@ int main(void) {
 	clear_interrupt(INT_TIMER1);
 	enable_interrupts(GLOBAL);
 
-	printf("Hello\n\r");
-
 	while (TRUE) {
 		trata_bto();
 	}
