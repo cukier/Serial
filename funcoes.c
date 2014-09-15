@@ -37,11 +37,8 @@ long getPos(int *str) {
 
 	p = str;
 
-	aux[0] = *(p + 2);
-	aux[1] = *(p + 3);
-	aux[2] = *(p + 4);
-	aux[3] = *(p + 5);
-	aux[4] = *(p + 6);
+	for (i = 0; i < 5; ++i)
+		aux[i] = *(p + i + 2);
 
 	return atol(aux);
 
