@@ -59,7 +59,7 @@ int set_port(int baud_rate, int fd) {
 
 int main(int argc, char **argv) {
 
-	int fd, n;
+	int fd, n, cont;
 	unsigned char str[9], buffer[1024];
 
 	str[0] = 0x01;
@@ -67,9 +67,9 @@ int main(int argc, char **argv) {
 	str[2] = 0x00;
 	str[3] = 0x00;
 	str[4] = 0x00;
-	str[5] = 0x0A;
-	str[6] = 0xC5;
-	str[7] = 0xCD;
+	str[5] = 0x32;
+	str[6] = 0xC4;
+	str[7] = 0x1F;
 	str[8] = '\0';
 
 	fd = open_port("/dev/ttyS0");
@@ -80,13 +80,14 @@ int main(int argc, char **argv) {
 
 	printf("Enviados %d bytes\n\r", n);
 
-	usleep(10000);
-
-	n = read(fd, buffer, 1024);
+	n = -1;
+	while (n == -1)
+		n = read(fd, buffer, 1024);
 
 	printf("lido %d bytes\n\r", n);
 	if (n > 0)
-		printf("%s\n\r", buffer);
+		for (cont = 0; cont < n; ++cont)
+			printf("0x%X ", buffer[cont]);
 
 	close(fd);
 
