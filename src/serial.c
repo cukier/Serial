@@ -44,7 +44,14 @@ int set_port(int baud_rate, int fd) {
 	tcgetattr(fd, &options);
 	cfsetispeed(&options, speed);
 	cfsetospeed(&options, speed);
+
 	options.c_cflag |= (CLOCAL | CREAD);
+	options.c_cflag &= ~PARENB; /* Mask the character size to 8 bits, no parity */
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE;
+	options.c_cflag |= CS8; /* Select 8 data bits */
+	options.c_cflag &= ~CRTSCTS; /* Disable hardware flow control */
+
 	tcsetattr(fd, TCSANOW, &options);
 
 	return 0;
@@ -65,13 +72,15 @@ int main(int argc, char **argv) {
 	str[7] = 0xCD;
 	str[8] = '\0';
 
-	fd = open_port("/dev/ttyS9");
+	fd = open_port("/dev/ttyS0");
 
 	set_port(19200, fd);
 
 	n = write(fd, str, 8);
 
 	printf("Enviados %d bytes\n\r", n);
+
+	usleep(10000);
 
 	n = read(fd, buffer, 1024);
 
