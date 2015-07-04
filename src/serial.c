@@ -59,7 +59,7 @@ int set_port(int baud_rate, int fd) {
 
 int main(int argc, char **argv) {
 
-	int fd, n, cont;
+	int fd, n, cont, tentativas;
 	unsigned char str[9], buffer[1024];
 
 	str[0] = 0x01;
@@ -80,14 +80,19 @@ int main(int argc, char **argv) {
 
 	printf("Enviados %d bytes\n\r", n);
 
+	usleep(5000);
+
 	n = -1;
-	while (n == -1)
+	while (n == -1) {
 		n = read(fd, buffer, 1024);
+		tentativas++;
+	}
 
 	printf("lido %d bytes\n\r", n);
 	if (n > 0)
 		for (cont = 0; cont < n; ++cont)
 			printf("0x%X ", buffer[cont]);
+	printf("\n\rTetativas de leitura %d\n\r", tentativas);
 
 	close(fd);
 
