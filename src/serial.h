@@ -11,22 +11,11 @@
 typedef struct pre_req_str {
 	unsigned char addr;
 	unsigned char cmd;
-	unsigned short from;
-	unsigned short to;
+	unsigned char from_h;
+	unsigned char from_l;
+	unsigned char to_h;
+	unsigned char to_l;
 } pre_req_type;
-
-typedef struct req_str {
-	unsigned char addr;
-	unsigned char cmd;
-	unsigned short from;
-	unsigned short to;
-	unsigned short crc16;
-} req_type;
-
-typedef union req_str_un {
-	req_type data;
-	unsigned char str[8];
-} req_str_un_type;
 
 typedef union pre_req_un {
 	pre_req_type data;
@@ -125,20 +114,16 @@ int set_port(int baud_rate, int fd) {
 }
 
 unsigned char getByte(unsigned short word, int offset) {
-	int mak = 0xFF;
-	unsigned char teste;
+	int mask = 0xFF;
 
-	mak <<= offset * 8;
+	mask <<= offset * 8;
 
-	teste = (unsigned char) ((word & mak) >> 8 * offset);
-
-	return teste;
+	return (unsigned char) ((word & mask) >> 8 * offset);
 }
 
 int make_request(int addr, int cmd, int from, int to, unsigned char *request) {
 	pre_req_un_type pre_request;
 	unsigned short crcWord;
-	unsigned char teste[8];
 
 	if (addr > 255 || addr < 0)
 		return 1;
@@ -147,19 +132,21 @@ int make_request(int addr, int cmd, int from, int to, unsigned char *request) {
 
 	pre_request.data.addr = (unsigned char) addr;
 	pre_request.data.cmd = (unsigned char) cmd;
-	pre_request.data.from = (unsigned short) from;
-	pre_request.data.to = (unsigned short) to;
+	pre_request.data.from_h = getByte(from, 1);
+	pre_request.data.from_l = getByte(from, 0);
+	pre_request.data.to_h = getByte(to, 1);
+	pre_request.data.to_l = getByte(to, 0);
 
-	crcWord = CRC16(pre_request.str, 8);
+	crcWord = CRC16(pre_request.str, 6);
 
-	teste[0] = request[0] = (unsigned char) addr;
-	teste[1] = request[1] = (unsigned char) cmd;
-	teste[2] = request[2] = getByte(from, 1);
-	teste[3] = request[3] = getByte(from, 0);
-	teste[4] = request[4] = getByte(to, 1);
-	teste[5] = request[5] = getByte(to, 0);
-	teste[6] = request[6] = getByte(crcWord, 1);
-	teste[7] = request[7] = getByte(crcWord, 0);
+	request[0] = (unsigned char) addr;
+	request[1] = (unsigned char) cmd;
+	request[2] = getByte(from, 1);
+	request[3] = getByte(from, 0);
+	request[4] = getByte(to, 1);
+	request[5] = getByte(to, 0);
+	request[6] = getByte(crcWord, 0);
+	request[7] = getByte(crcWord, 1);
 
 	return 0;
 }
