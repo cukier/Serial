@@ -13,68 +13,23 @@
 #include <termios.h>
 #include <stdlib.h>
 
-int open_port(char *porta) {
-	int fd;
-
-	fd = open(porta, O_RDWR | O_NOCTTY | O_NDELAY);
-
-	if (fd == -1) {
-		fprintf(stderr, "Problemas ao abrir a porta \"%s\" : %s\n", porta,
-				strerror(errno));
-		exit(-1);
-	}
-
-	return fd;
-}
-
-int set_port(int baud_rate, int fd) {
-	struct termios options;
-	speed_t speed;
-
-	switch (baud_rate) {
-	default:
-	case 9600:
-		speed = B9600;
-		break;
-	case 19200:
-		speed = B19200;
-		break;
-	}
-
-	tcgetattr(fd, &options);
-	cfsetispeed(&options, speed);
-	cfsetospeed(&options, speed);
-
-	options.c_cflag |= (CLOCAL | CREAD);
-	options.c_cflag &= ~PARENB; /* Mask the character size to 8 bits, no parity */
-	options.c_cflag &= ~CSTOPB;
-	options.c_cflag &= ~CSIZE;
-	options.c_cflag |= CS8; /* Select 8 data bits */
-	options.c_cflag &= ~CRTSCTS; /* Disable hardware flow control */
-
-	tcsetattr(fd, TCSANOW, &options);
-
-	return 0;
-}
+#include "serial.h"
 
 int main(int argc, char **argv) {
 
 	int fd, n, cont, tentativas;
-	unsigned char str[9], buffer[1024];
+	unsigned char str[8], buffer[1024];
 
-	str[0] = 0x01;
-	str[1] = 0x03;
-	str[2] = 0x00;
-	str[3] = 0x00;
-	str[4] = 0x00;
-	str[5] = 0x32;
-	str[6] = 0xC4;
-	str[7] = 0x1F;
-	str[8] = '\0';
+	if (argc == 1) {
+		printf("No Door?\n\r");
+		return 1;
+	}
 
-	fd = open_port("/dev/ttyS0");
+	fd = open_port(argv[1]);
 
-	set_port(19200, fd);
+	set_port(9600, fd);
+
+	make_request(1, 3, 0, 10, str);
 
 	n = write(fd, str, 8);
 
@@ -82,16 +37,16 @@ int main(int argc, char **argv) {
 
 	usleep(5000);
 
-	n = -1;
-	while (n == -1) {
-		n = read(fd, buffer, 1024);
-		tentativas++;
-	}
+//	n = -1;
+//	while (n == -1) {
+//		n = read(fd, buffer, 1024);
+//		tentativas++;
+//	}
 
 	printf("lido %d bytes\n\r", n);
 	if (n > 0)
 		for (cont = 0; cont < n; ++cont)
-			printf("0x%X ", buffer[cont]);
+			printf("0x%X ", str[cont]);
 	printf("\n\rTetativas de leitura %d\n\r", tentativas);
 
 	close(fd);
