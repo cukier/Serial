@@ -16,9 +16,6 @@
 #include <termios.h>
 #include <stdlib.h>
 
-
-
-
 int open_port(char *porta);
 int set_port(int baud_rate, int fd);
 
