@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
 	if (argc == 1) {
 		printf("No Door?\n\r");
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	fd = open_port(argv[1]);
@@ -45,6 +45,6 @@ int main(int argc, char **argv) {
 
 	close(fd);
 
-	return 0;
+	return EXIT_SUCCESS;
 
 }

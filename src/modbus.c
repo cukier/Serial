@@ -56,22 +56,20 @@ unsigned char getByte(unsigned short word, int offset) {
 }
 
 int make_request(int addr, int cmd, int from, int to, unsigned char *request) {
-	pre_req_un_type pre_request;
 	unsigned short crcWord;
+	unsigned char pre_request[6];
 
-	if (addr > 255 || addr < 0)
+	if (addr > 255 || addr < 0 || to == from || from < 0 || to < 0)
 		return 1;
-	else if (to == from || from < 0 || to < 0)
-		return 2;
 
-	pre_request.data.addr = (unsigned char) addr;
-	pre_request.data.cmd = (unsigned char) cmd;
-	pre_request.data.from_h = getByte(from, 1);
-	pre_request.data.from_l = getByte(from, 0);
-	pre_request.data.to_h = getByte(to, 1);
-	pre_request.data.to_l = getByte(to, 0);
+	pre_request[0] = (unsigned char) addr;
+	pre_request[1] = (unsigned char) cmd;
+	pre_request[2] = getByte(from, 1);
+	pre_request[3] = getByte(from, 0);
+	pre_request[4] = getByte(to, 1);
+	pre_request[5] = getByte(to, 0);
 
-	crcWord = CRC16(pre_request.str, 6);
+	crcWord = CRC16(pre_request, 6);
 
 	request[0] = (unsigned char) addr;
 	request[1] = (unsigned char) cmd;
