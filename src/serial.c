@@ -1,17 +1,4 @@
-/*
- * serial.c
- *
- *  Created on: 05/12/2014
- *      Author: cuki
- */
-
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <termios.h>
-#include <stdlib.h>
+#include "serial.h"
 
 int open_port(char *porta) {
 	int fd;
@@ -44,62 +31,15 @@ int set_port(int baud_rate, int fd) {
 	tcgetattr(fd, &options);
 	cfsetispeed(&options, speed);
 	cfsetospeed(&options, speed);
+
 	options.c_cflag |= (CLOCAL | CREAD);
+	options.c_cflag &= ~PARENB; /* Mask the character size to 8 bits, no parity */
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE;
+	options.c_cflag |= CS8; /* Select 8 data bits */
+	options.c_cflag &= ~CRTSCTS; /* Disable hardware flow control */
+
 	tcsetattr(fd, TCSANOW, &options);
 
 	return 0;
-}
-
-int get_msg_size(char *msg) {
-	int cont;
-	for (cont = 0; *msg != '\0'; msg++, cont++)
-		;
-
-	return cont;
-}
-
-int read_port(int fd, char *buffer, int size) {
-	int n = read(fd, buffer, size);
-	if (n < 0) {
-		fputs("read failed!\n", stderr);
-		exit(2);
-	}
-	return (fd);
-}
-
-int main(int argc, char **argv) {
-
-	int fd, n, s;
-	char str[160];
-	char buffer[32];
-
-	if (argc == 1) {
-		printf("no door?\n\r");
-		exit(1);
-	}
-
-	fd = open_port(argv[1]);
-
-	set_port(9600, fd);
-
-	strcpy(str, "\fHelloDude");
-
-	s = get_msg_size(str);
-
-	printf("Tamanho da mensagem %d\n\r", s);
-
-	n = write(fd, str, s);
-
-	printf("Enviados %d bytes\n\r", n);
-
-//	fcntl(fd, F_SETFL, 0);
-	printf("Lendo\n\r");
-	read_port(fd, buffer, 32);
-
-	printf("Recebido\n\r%s", buffer);
-
-	close(fd);
-
-	return 0;
-
 }
