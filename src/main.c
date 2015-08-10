@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 			"Em execucao: porta %s, tempo maximo %s segundos e %s tentativas\n\r",
 			argv[1], argv[2], argv[3]);
 
-	make_request(1, 3, 0, 10, str);
+	make_read_request(1, 0, 10, str);
 
 	for (cont = 0; cont < tentativas; ++cont) {
 		printf("Enviados %d bytes", (int) write(fd, str, 8));
