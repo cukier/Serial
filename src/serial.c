@@ -1,15 +1,19 @@
-#include "serial.h"
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <termios.h>
+#include <stdlib.h>
 
 int open_port(char *porta) {
 	int fd;
 
 	fd = open(porta, O_RDWR | O_NOCTTY | O_NDELAY);
 
-	if (fd == -1) {
+	if (fd == -1)
 		fprintf(stderr, "Problemas ao abrir a porta \"%s\" : %s\n", porta,
 				strerror(errno));
-		exit(EXIT_FAILURE);
-	}
 
 	return fd;
 }

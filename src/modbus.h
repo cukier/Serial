@@ -14,7 +14,7 @@
 
 unsigned short CRC16(const unsigned char *nData, unsigned short wLength);
 unsigned char getByte(unsigned short word, int offset);
-int make_write_request(int addr, int reg, int value, unsigned char *request);
-int make_read_request(int addr, int from, int to, unsigned char *request);
+int make_write_request(int addr, int reg, int value, char *request);
+int make_read_request(int addr, int from, int to, char *request);
 
 #endif /* MODBUS_H_ */

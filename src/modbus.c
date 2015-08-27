@@ -55,7 +55,7 @@ unsigned char getByte(unsigned short word, int offset) {
 	return (unsigned char) ((word & mask) >> 8 * offset);
 }
 
-int make_write_request(int addr, int reg, int value, unsigned char *request) {
+int make_write_request(int addr, int reg, int value, char *request) {
 	unsigned short crcWord;
 	unsigned char pre_request[6];
 
@@ -68,8 +68,10 @@ int make_write_request(int addr, int reg, int value, unsigned char *request) {
 	pre_request[3] = getByte(reg, 0);
 	pre_request[4] = getByte(value, 1);
 	pre_request[5] = getByte(value, 0);
+
 	crcWord = CRC16(pre_request, 6);
-	request[0] = (unsigned char) addr;
+
+	request[0] = (char) addr;
 	request[1] = WRITE_SINGLE_REGISTER;
 	request[2] = getByte(reg, 1);
 	request[3] = getByte(reg, 0);
@@ -81,7 +83,7 @@ int make_write_request(int addr, int reg, int value, unsigned char *request) {
 	return 0;
 }
 
-int make_read_request(int addr, int from, int to, unsigned char *request) {
+int make_read_request(int addr, int from, int to, char *request) {
 	unsigned short crcWord;
 	unsigned char pre_request[6];
 
@@ -97,7 +99,7 @@ int make_read_request(int addr, int from, int to, unsigned char *request) {
 
 	crcWord = CRC16(pre_request, 6);
 
-	request[0] = (unsigned char) addr;
+	request[0] = (char) addr;
 	request[1] = READ_MULTIPLE_REGISTERS;
 	request[2] = getByte(from, 1);
 	request[3] = getByte(from, 0);
