@@ -32,18 +32,33 @@ int set_port(int baud_rate, int fd) {
 		break;
 	}
 
-	tcgetattr(fd, &options);
-	cfsetispeed(&options, speed);
-	cfsetospeed(&options, speed);
+	if ((tcgetattr(fd, &options) == -1) || (cfsetispeed(&options, speed) == -1)
+			|| (cfsetospeed(&options, speed) == -1))
+		return -1;
 
-	options.c_cflag |= (CLOCAL | CREAD);
-	options.c_cflag &= ~PARENB;
-	options.c_cflag &= ~CSTOPB;
-	options.c_cflag &= ~CSIZE;
-	options.c_cflag |= CS8;
-	options.c_cflag &= ~CRTSCTS;
+	options.c_cflag |= (CLOCAL | CREAD);	//**************************//
+	options.c_cflag &= ~PARENB;				//							//
+	options.c_cflag &= ~CSTOPB;				//		No parity (8N1):	//
+	options.c_cflag &= ~CSIZE;				//							//
+	options.c_cflag |= CS8;					//**************************//
+	options.c_cflag &= ~CRTSCTS;			//disable hardware flow control
+	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); //raw input
+	options.c_iflag &= ~(IXON | IXOFF | IXANY); //disable software flow control
 
-	tcsetattr(fd, TCSANOW, &options);
+	if (tcsetattr(fd, TCSANOW, &options) == -1)
+		return -1;
 
 	return 0;
+}
+
+int make_transaction(int fd, unsigned char *request, unsigned char *response,
+		int req_size, int res_size) {
+	int n;
+
+	write(fd, request, req_size);
+	tcflush(fd, TCIOFLUSH);
+	usleep(300000);
+	n = read(fd, response, res_size);
+
+	return n;
 }
