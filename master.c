@@ -17,10 +17,11 @@
 #include "defines.c"
 #include "variaveis.c"
 #include "funcoes.c"
+#include "interrupcoes.c"
 
 int main(void) {
 
-	m_cmd = cmd_parar;
+	init_mstr();
 
 	while (TRUE) {
 

@@ -4,6 +4,7 @@
  *  Created on: 21/08/2014
  *      Author: cuki
  */
+
 int getAddr(int *str) {
 
 	int *p;
@@ -55,6 +56,25 @@ void send_pos(int addr, long pos) {
 	printf("%02u%05lu\n\r", addr, pos);
 }
 
+long *recall_pos(int nrSlaves, long pos) {
+	int i;
+	static long ret[bufferLen];
+
+	send_cmd(allSlvs, cmd_w);
+	send_pos(allSlvs, pos);
+
+	for (i = 1; i <= nrSlaves; ++i) {
+		send_cmd(i, cmd_r);
+		delay_ms(latencia * 2);
+		while (!RxOk)
+			;
+		RxOk = FALSE;
+		ret[i - 1] = getPos(buffer);
+	}
+
+	return ret;
+}
+
 int trata_bto(int cmd) {
 	short sobe = !input(bto_sobe);
 	short desce = !input(bto_desce);
@@ -77,37 +97,107 @@ int trata_bto(int cmd) {
 	return ret;
 }
 
-long *recall_pos(int nrSlaves, long pos) {
-	int i;
-	static long ret[arrayLen];
-	int aux[arrayLen];
+int trata_comunicacao() {
 
-	send_cmd(allSlvs, cmd_w);
-	send_pos(allSlvs, pos);
-
-	for (i = 1; i <= nrSlaves; ++i) {
-		send_cmd(i, cmd_r);
-		gets(aux);
-		ret[i - 1] = getPos(aux);
-	}
-
-	return ret;
-}
-
-void trata_comunicacao() {
-
-	gets(buffer);
 	r_addr = 0xFF;
 	r_cmd = 0xFF;
+
 	r_addr = getAddr(buffer);
 	r_cmd = getCmd(buffer);
 
-	if (r_addr == m_addr | !r_addr) {
+	if (r_addr == m_addr || !r_addr) {
 		if (r_cmd == cmd_w) {
-			gets(buffer);
+			while (!RxOk)
+				;
+			RxOk = FALSE;
 			r_pos = getPos(buffer);
 		} else if (r_cmd == cmd_r) {
-			send_pos(m_addr, r_pos);
+			m_pos++;
+			send_pos(m_addr, m_pos);
 		}
 	}
+
+	return r_cmd;
+}
+
+void subir() {
+	output_low(pin_desce);
+	delay_ms(latencia >> 1);
+	output_high(pin_sobe);
+}
+
+void descer() {
+	output_low(pin_sobe);
+	delay_ms(latencia >> 1);
+	output_high(pin_desce);
+}
+
+void parar() {
+	output_low(pin_sobe);
+	output_low(pin_desce);
+	m_pos += get_timer0();
+	set_timer0(0);
+}
+
+int getMAddr() {
+	int aux = input_a();
+	return ((input_a() & 0xF0) >> 4) & 0x0F;
+}
+
+void init_mstr() {
+//	set_timer0(T0_EXT_H_TO_L | T0_DIV_1);
+//	set_timer1(T1_EXTERNAL | T1_DIV_BY_1);
+
+	clear_interrupt(INT_RDA);
+	enable_interrupts(INT_RDA);
+	enable_interrupts(GLOBAL);
+
+	m_cmd = cmd_parar;
+	nrSlv = getMAddr();
+
+	parar();
+
+	printf("Inicio Mestre:\n\r%d escravos\n\r", nrSlv);
+}
+
+void init_slv() {
+//	set_timer0(T0_EXT_H_TO_L | T0_DIV_1);
+//	set_timer1(T1_EXTERNAL | T1_DIV_BY_1);
+
+	clear_interrupt(INT_RDA);
+	enable_interrupts(INT_RDA);
+	enable_interrupts(GLOBAL);
+
+	m_cmd = cmd_parar;
+	m_addr = getMAddr();
+
+	parar();
+
+	printf("Inicio Escravo:\n\rEndereco: %d\n\r", m_addr);
+}
+
+void trata_cmd(int cmd) {
+	switch (cmd) {
+	case cmd_subir:
+		subir();
+		break;
+	case cmd_descer:
+		descer();
+		break;
+	case cmd_parar:
+		parar();
+		cmd_parar;
+		break;
+	default:
+	}
+}
+
+short recivedOk(int *buff) {
+	int *p;
+
+	for (p = buff; *p != '\0'; p++)
+		if (*p == '\n' && *(p + 1) == '\r')
+			return TRUE;
+
+	return FALSE;
 }

@@ -17,13 +17,19 @@
 #include "defines.c"
 #include "variaveis.c"
 #include "funcoes.c"
+#include "interrupcoes.c"
 
 int main(void) {
 
-	m_addr = 1;
+	init_slv();
 
 	while (TRUE) {
-		trata_comunicacao();
+
+		if (RxOk) {
+			RxOk = FALSE;
+			trata_comunicacao();
+		}
+
 	}
 
 	return 0;
