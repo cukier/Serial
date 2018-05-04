@@ -1,0 +1,4 @@
+*.o
+*.dll
+*.prefs
+*.xml
