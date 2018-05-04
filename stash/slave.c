@@ -1,5 +1,5 @@
 /*
- * master.c
+ * slave.c
  *
  *  Created on: 18/08/2014
  *      Author: cuki
@@ -17,24 +17,20 @@
 #include "defines.c"
 #include "variaveis.c"
 #include "funcoes.c"
+#include "interrupcoes.c"
 
 int main(void) {
 
-	m_cmd = cmd_parar;
+	init_slv();
 
 	while (TRUE) {
 
-		m_cmd = trata_bto(m_cmd);
-
-		if (m_cmd == cmd_subir || m_cmd == cmd_descer) {
-			p = recall_pos(nrSlv, r_pos);
-			for (i = 0; i < nrSlv; ++i) {
-				pos_slv[i] = *(p + i);
-			}
+		if (RxOk) {
+			RxOk = FALSE;
+			trata_comunicacao();
 		}
-		delay_ms(100);
+
 	}
 
 	return 0;
 }
-
